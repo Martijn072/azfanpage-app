@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { Search, Filter, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface SearchAndFilterProps {
   searchQuery: string;
@@ -44,31 +43,31 @@ export const SearchAndFilter = ({
 
       {/* Filter Controls */}
       <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
+        <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 border-premium-gray-200 hover:border-az-red hover:bg-az-red/5 transition-all duration-200 ${
-            hasActiveFilters ? 'border-az-red bg-az-red/5' : ''
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 font-medium ${
+            hasActiveFilters 
+              ? 'bg-premium-gray-50 border-premium-gray-300 text-premium-gray-700' 
+              : 'bg-white border-premium-gray-200 text-premium-gray-600 hover:border-premium-gray-300 hover:bg-premium-gray-50'
           }`}
         >
           <Filter className="w-4 h-4" />
-          <span className="font-medium">Categorieën</span>
+          <span>Categorieën</span>
           {hasActiveFilters && (
             <span className="bg-az-red text-white text-xs px-2 py-0.5 rounded-full font-semibold min-w-[20px] h-5 flex items-center justify-center">
               {activeFilterCount}
             </span>
           )}
-        </Button>
+        </button>
 
         {hasActiveFilters && (
-          <Button
-            variant="ghost"
+          <button
             onClick={onClearFilters}
-            className="text-premium-gray-500 hover:text-az-red hover:bg-az-red/5 flex items-center gap-2 font-medium transition-all duration-200"
+            className="text-premium-gray-500 hover:text-az-red flex items-center gap-2 font-medium transition-all duration-200 px-3 py-2 rounded-lg hover:bg-premium-gray-50"
           >
             <X className="w-4 h-4" />
             Wis alle filters
-          </Button>
+          </button>
         )}
       </div>
 
