@@ -70,14 +70,17 @@ const News = () => {
     <div className="min-h-screen bg-premium-gray-50">
       <Header />
       
-      <div className="px-4 pb-20 pt-6">
-        <div className="mb-6">
-          <h1 className="headline-premium text-headline-xl mb-2 text-az-black">
-            Alle Nieuws
-          </h1>
-          <p className="body-premium text-body-md text-premium-gray-600">
-            Het laatste nieuws over AZ Alkmaar
-          </p>
+      <div className="px-4 pb-20">
+        {/* Hero Section */}
+        <div className="pt-8 pb-8">
+          <div className="max-w-4xl">
+            <h1 className="headline-premium text-headline-xl mb-4 text-az-black leading-tight">
+              AZ Nieuws
+            </h1>
+            <p className="body-premium text-body-lg text-premium-gray-600 max-w-2xl leading-relaxed">
+              Blijf op de hoogte van het laatste nieuws over AZ Alkmaar. Van wedstrijdverslagen tot transfernieuws en behind-the-scenes verhalen.
+            </p>
+          </div>
         </div>
 
         {/* Search and Filter */}
@@ -105,13 +108,20 @@ const News = () => {
             </div>
 
             {articles.length === 0 && (
-              <div className="card-premium p-8 text-center">
-                <p className="body-premium text-premium-gray-600">
-                  {searchQuery || selectedCategory !== 'Alle' 
-                    ? 'Geen artikelen gevonden voor de huidige filters.'
-                    : 'Geen artikelen gevonden.'
-                  }
-                </p>
+              <div className="card-premium p-12 text-center">
+                <div className="max-w-md mx-auto">
+                  <p className="body-premium text-body-lg text-premium-gray-600 mb-2">
+                    {searchQuery || selectedCategory !== 'Alle' 
+                      ? 'Geen artikelen gevonden voor de huidige filters.'
+                      : 'Geen artikelen beschikbaar.'
+                    }
+                  </p>
+                  {(searchQuery || selectedCategory !== 'Alle') && (
+                    <p className="body-premium text-body-sm text-premium-gray-500">
+                      Probeer andere zoektermen of wijzig de filters.
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
