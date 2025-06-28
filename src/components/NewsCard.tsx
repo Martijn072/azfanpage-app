@@ -52,7 +52,7 @@ export const NewsCard = ({ article }: NewsCardProps) => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <User className="w-4 h-4" />
-              <span>By {article.author} | azfanpage.nl</span>
+              <span>{article.author}</span>
             </div>
           </div>
           
