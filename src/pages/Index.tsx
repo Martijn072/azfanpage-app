@@ -21,7 +21,7 @@ const Index = () => {
   const breakingNews = articles.filter(article => article.isBreaking);
 
   return (
-    <div className="min-h-screen bg-premium-gray-50">
+    <div className="min-h-screen bg-premium-gray-50 dark:bg-gray-900">
       <Header />
       
       {/* Live Score Widget */}
@@ -40,7 +40,7 @@ const Index = () => {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
               <span className="breaking-news">🔥 Breaking</span>
-              <span className="text-premium-gray-600 text-sm">
+              <span className="text-premium-gray-600 dark:text-gray-300 text-sm">
                 {breakingNews.length} {breakingNews.length === 1 ? 'nieuw artikel' : 'nieuwe artikelen'}
               </span>
             </div>
@@ -62,8 +62,8 @@ const Index = () => {
             </div>
 
             {articles.length === 0 && (
-              <div className="card-premium p-8 text-center">
-                <p className="body-premium text-premium-gray-600">
+              <div className="card-premium dark:bg-gray-800 dark:border-gray-700 p-8 text-center">
+                <p className="body-premium text-premium-gray-600 dark:text-gray-300">
                   Geen artikelen gevonden voor de categorie "{selectedCategory}".
                 </p>
               </div>
@@ -73,7 +73,7 @@ const Index = () => {
             {articles.length > 0 && (
               <div className="mt-8 text-center">
                 <button 
-                  className="btn-secondary"
+                  className="btn-secondary dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
                   onClick={() => refetch()}
                 >
                   Ververs voor nieuw nieuws
