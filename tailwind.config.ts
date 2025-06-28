@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,14 +20,33 @@ export default {
 		},
 		extend: {
 			colors: {
+				// AZ Brand Colors
+				'az-red': '#DB0021',
+				'az-white': '#FFFFFF',
+				'az-black': '#1A171B',
+				
+				// Premium grays for Athletic-style sophistication
+				'premium-gray': {
+					50: '#FAFAFA',
+					100: '#F5F5F5',
+					200: '#E5E5E5',
+					300: '#D4D4D4',
+					400: '#A3A3A3',
+					500: '#737373',
+					600: '#525252',
+					700: '#404040',
+					800: '#262626',
+					900: '#171717',
+				},
+				
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#DB0021',
+					foreground: '#FFFFFF'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -63,6 +83,20 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
+			fontFamily: {
+				'headline': ['Inter', 'system-ui', 'sans-serif'],
+				'body': ['Georgia', 'Times New Roman', 'serif'],
+				'sans': ['Inter', 'system-ui', 'sans-serif'],
+			},
+			fontSize: {
+				'headline-xl': ['2.5rem', { lineHeight: '1.2', fontWeight: '800' }],
+				'headline-lg': ['2rem', { lineHeight: '1.25', fontWeight: '700' }],
+				'headline-md': ['1.5rem', { lineHeight: '1.3', fontWeight: '600' }],
+				'headline-sm': ['1.25rem', { lineHeight: '1.35', fontWeight: '600' }],
+				'body-lg': ['1.125rem', { lineHeight: '1.7' }],
+				'body-md': ['1rem', { lineHeight: '1.6' }],
+				'body-sm': ['0.875rem', { lineHeight: '1.5' }],
+			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
@@ -84,11 +118,33 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'slide-up': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(20px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'slide-up': 'slide-up 0.4s ease-out'
 			}
 		}
 	},
