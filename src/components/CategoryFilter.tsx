@@ -7,7 +7,7 @@ interface CategoryFilterProps {
 
 export const CategoryFilter = ({ categories, selectedCategory, onCategoryChange }: CategoryFilterProps) => {
   return (
-    <div className="mb-6">
+    <div className="mb-8">
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {categories.map((category) => (
           <button
