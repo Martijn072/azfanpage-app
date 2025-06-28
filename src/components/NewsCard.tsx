@@ -1,3 +1,4 @@
+
 import { User, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -42,7 +43,7 @@ export const NewsCard = ({ article }: NewsCardProps) => {
             <span className="breaking-news">🔥 Breaking</span>
           </div>
         )}
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-premium-gray-700">
+        <div className="absolute top-4 right-4 bg-az-red/80 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold text-white shadow-lg hover:bg-az-red/90 hover:scale-105 transition-all duration-200">
           {article.category}
         </div>
       </div>
