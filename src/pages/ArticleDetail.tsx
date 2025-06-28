@@ -89,7 +89,7 @@ const ArticleDetail = () => {
       <div className="bg-white border-b border-premium-gray-200">
         <div className="px-4 py-4">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/nieuws')}
             className="flex items-center gap-2 text-premium-gray-600 hover:text-az-red transition-colors"
           >
             <span>← Terug naar nieuws</span>
