@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Calendar, Tag, Link, Share2, MessageCircle } from "lucide-react";
 import { useArticleDetail } from "@/hooks/useArticleDetail";
@@ -15,6 +15,11 @@ const ArticleDetail = () => {
   const { data: article, isLoading, error, refetch } = useArticleDetail(id!);
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("news");
+
+  // Scroll to top when component mounts or ID changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [id]);
 
   const handleCopyLink = async () => {
     try {
