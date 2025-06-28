@@ -6,19 +6,13 @@ export const Header = () => {
     <header className="bg-white border-b border-premium-gray-100 sticky top-0 z-50 shadow-sm">
       <div className="px-4 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo and Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-az-red rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">AZ</span>
-            </div>
-            <div>
-              <h1 className="font-headline font-bold text-az-black text-lg">
-                AZFanpage.nl
-              </h1>
-              <p className="text-xs text-premium-gray-500 -mt-1">
-                Kritisch, onafhankelijk, betrokken
-              </p>
-            </div>
+          {/* Logo */}
+          <div className="flex items-center">
+            <img 
+              src="/lovable-uploads/02689d46-9781-412f-9093-feef3e99cfe2.png" 
+              alt="AZ Fanpage Logo" 
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Actions */}
