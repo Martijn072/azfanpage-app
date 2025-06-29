@@ -9,6 +9,130 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          user_id: string | null
+          user_identifier: string | null
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          user_identifier?: string | null
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          user_identifier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comments: {
+        Row: {
+          article_id: string
+          author_avatar: string | null
+          author_email: string | null
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          is_approved: boolean | null
+          is_pinned: boolean | null
+          likes_count: number | null
+          parent_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          article_id: string
+          author_avatar?: string | null
+          author_email?: string | null
+          author_name: string
+          content: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          article_id?: string
+          author_avatar?: string | null
+          author_email?: string | null
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          comment_mentions: boolean | null
+          comment_replies: boolean | null
+          created_at: string
+          email: string
+          email_notifications: boolean | null
+          id: string
+          push_notifications: boolean | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          comment_mentions?: boolean | null
+          comment_replies?: boolean | null
+          created_at?: string
+          email: string
+          email_notifications?: boolean | null
+          id?: string
+          push_notifications?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          comment_mentions?: boolean | null
+          comment_replies?: boolean | null
+          created_at?: string
+          email?: string
+          email_notifications?: boolean | null
+          id?: string
+          push_notifications?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           article_id: string | null

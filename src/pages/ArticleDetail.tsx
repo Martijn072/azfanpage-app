@@ -7,7 +7,7 @@ import { ArticlesSkeleton } from "@/components/ArticlesSkeleton";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { DisqusComments } from "@/components/DisqusComments";
+import { WordPressComments } from "@/components/WordPressComments";
 import { ShareBar } from "@/components/ShareBar";
 
 const ArticleDetail = () => {
@@ -124,11 +124,10 @@ const ArticleDetail = () => {
           />
         </div>
 
-        {/* Disqus Comments Section */}
-        <DisqusComments
-          slug={article.slug}
-          title={article.title}
+        {/* WordPress Comments Section - replaces Disqus */}
+        <WordPressComments
           articleId={id!}
+          title={article.title}
         />
       </article>
 
