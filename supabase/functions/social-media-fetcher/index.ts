@@ -14,7 +14,7 @@ const API_SECRET = Deno.env.get("TWITTER_CONSUMER_SECRET")?.trim();
 const ACCESS_TOKEN = Deno.env.get("TWITTER_ACCESS_TOKEN")?.trim();
 const ACCESS_TOKEN_SECRET = Deno.env.get("TWITTER_ACCESS_TOKEN_SECRET")?.trim();
 
-// Instagram API credentials (to be added later)
+// Instagram API credentials
 const INSTAGRAM_ACCESS_TOKEN = Deno.env.get("INSTAGRAM_ACCESS_TOKEN")?.trim();
 const INSTAGRAM_USER_ID = Deno.env.get("INSTAGRAM_USER_ID")?.trim();
 
@@ -28,7 +28,7 @@ function validateTwitterCredentials() {
 
 function validateInstagramCredentials() {
   if (!INSTAGRAM_ACCESS_TOKEN || !INSTAGRAM_USER_ID) {
-    console.log('⚠️ Instagram credentials not configured, skipping Instagram fetch');
+    console.log('⚠️ Instagram credentials not configured, using mock data');
     return false;
   }
   return true;
@@ -108,6 +108,7 @@ async function fetchTwitterPosts(): Promise<any[]> {
     const userUrl = `https://api.x.com/2/users/by/username/azfanpage`;
     const userOauthHeader = generateOAuthHeader("GET", userUrl);
     
+    console.log('🔍 Fetching user info for @azfanpage...');
     const userResponse = await fetch(userUrl, {
       method: "GET",
       headers: {
@@ -144,6 +145,7 @@ async function fetchTwitterPosts(): Promise<any[]> {
     const tweetsUrlWithParams = `${tweetsUrl}?${new URLSearchParams(queryParams).toString()}`;
     const tweetsOauthHeader = generateOAuthHeader("GET", tweetsUrl, queryParams);
 
+    console.log('📱 Fetching recent tweets...');
     const tweetsResponse = await fetch(tweetsUrlWithParams, {
       method: "GET",
       headers: {
@@ -159,7 +161,7 @@ async function fetchTwitterPosts(): Promise<any[]> {
     }
 
     const tweetsData = await tweetsResponse.json();
-    console.log('✅ Fetched tweets data:', JSON.stringify(tweetsData, null, 2));
+    console.log(`✅ Successfully fetched ${tweetsData.data?.length || 0} tweets`);
 
     return tweetsData.data || [];
   } catch (error) {
@@ -170,7 +172,8 @@ async function fetchTwitterPosts(): Promise<any[]> {
 
 async function fetchInstagramPosts(): Promise<any[]> {
   if (!validateInstagramCredentials()) {
-    // Return mock data for now
+    // Return mock data when credentials are not configured
+    console.log('📷 Using mock Instagram data (no credentials configured)');
     return [{
       id: 'ig_mock_' + Date.now(),
       caption: '🔥 Geweldige training vandaag! Het team is klaar voor de volgende wedstrijd! ⚽ #AZ #AlkmaarZaanstreek #Training',
@@ -182,7 +185,7 @@ async function fetchInstagramPosts(): Promise<any[]> {
   }
 
   try {
-    console.log('📷 Fetching Instagram posts...');
+    console.log('📷 Fetching Instagram posts from real API...');
     
     const url = `https://graph.instagram.com/${INSTAGRAM_USER_ID}/media?fields=id,caption,media_type,media_url,permalink,timestamp&access_token=${INSTAGRAM_ACCESS_TOKEN}&limit=10`;
     
@@ -195,7 +198,7 @@ async function fetchInstagramPosts(): Promise<any[]> {
     }
 
     const data = await response.json();
-    console.log('✅ Fetched Instagram posts:', data);
+    console.log(`✅ Successfully fetched ${data.data?.length || 0} Instagram posts`);
     
     return data.data || [];
   } catch (error) {
