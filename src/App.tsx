@@ -8,7 +8,6 @@ import { DarkModeProvider } from "@/contexts/DarkModeContext";
 import Index from "./pages/Index";
 import News from "./pages/News";
 import ArticleDetail from "./pages/ArticleDetail";
-import ConferenceLeague from "./pages/ConferenceLeague";
 import Eredivisie from "./pages/Eredivisie";
 import AZProgramma from "./pages/AZProgramma";
 import SpelerStatistieken from "./pages/SpelerStatistieken";
@@ -27,7 +26,6 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/nieuws" element={<News />} />
             <Route path="/artikel/:id" element={<ArticleDetail />} />
-            <Route path="/europa" element={<ConferenceLeague />} />
             <Route path="/eredivisie" element={<Eredivisie />} />
             <Route path="/programma" element={<AZProgramma />} />
             <Route path="/spelers" element={<SpelerStatistieken />} />
