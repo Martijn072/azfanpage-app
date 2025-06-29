@@ -171,6 +171,49 @@ const WedstrijdDetail = () => {
     }
   };
 
+  const translateStatType = (type: string) => {
+    const translations: { [key: string]: string } = {
+      'Shots on Goal': 'Schoten op doel',
+      'Shots off Goal': 'Schoten naast',
+      'Total Shots': 'Totaal schoten',
+      'Blocked Shots': 'Geblokkeerde schoten',
+      'Shots insidebox': 'Schoten in strafschopgebied',
+      'Shots outsidebox': 'Schoten buiten strafschopgebied',
+      'Fouls': 'Overtredingen',
+      'Corner Kicks': 'Hoekschoppen',
+      'Offsides': 'Buitenspel',
+      'Ball Possession': 'Balbezit',
+      'Yellow Cards': 'Gele kaarten',
+      'Red Cards': 'Rode kaarten',
+      'Goalkeeper Saves': 'Reddingen keeper',
+      'Total passes': 'Totaal passes',
+      'Passes accurate': 'Passes juist',
+      'Passes %': 'Pass percentage',
+      'Expected Goals': 'Expected Goals'
+    };
+    return translations[type] || type;
+  };
+
+  const getEventTypeText = (type: string, detail: string) => {
+    switch (type) {
+      case 'Goal':
+        if (detail === 'Normal Goal') return 'Doelpunt';
+        if (detail === 'Own Goal') return 'Eigen doelpunt';
+        if (detail === 'Penalty') return 'Penalty';
+        return 'Doelpunt';
+      case 'Card':
+        if (detail === 'Yellow Card') return 'Gele kaart';
+        if (detail === 'Red Card') return 'Rode kaart';
+        return 'Kaart';
+      case 'subst':
+        return 'Wissel';
+      case 'Var':
+        return 'VAR';
+      default:
+        return detail;
+    }
+  };
+
   if (fixtureLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -240,20 +283,22 @@ const WedstrijdDetail = () => {
               </Badge>
             </div>
             
-            {/* Teams and score */}
-            <div className="flex items-center justify-center gap-8 my-6">
-              <div className="flex flex-col items-center gap-2">
+            {/* Teams and score - Fixed alignment */}
+            <div className="grid grid-cols-5 items-center gap-4 my-6">
+              {/* Home team */}
+              <div className="col-span-2 flex flex-col items-center gap-2">
                 <img 
                   src={fixtureData.teams.home.logo} 
                   alt={fixtureData.teams.home.name}
                   className="w-16 h-16 object-contain"
                 />
-                <span className={`font-semibold text-center ${isAZHome ? 'text-az-red' : 'text-az-black dark:text-white'}`}>
+                <span className={`font-semibold text-center text-sm ${isAZHome ? 'text-az-red' : 'text-az-black dark:text-white'}`}>
                   {fixtureData.teams.home.name}
                 </span>
               </div>
 
-              <div className="text-center">
+              {/* Score */}
+              <div className="col-span-1 text-center">
                 {fixtureData.goals.home !== null && fixtureData.goals.away !== null ? (
                   <>
                     <div className="text-4xl font-bold text-az-red mb-2">
@@ -277,13 +322,14 @@ const WedstrijdDetail = () => {
                 )}
               </div>
 
-              <div className="flex flex-col items-center gap-2">
+              {/* Away team */}
+              <div className="col-span-2 flex flex-col items-center gap-2">
                 <img 
                   src={fixtureData.teams.away.logo} 
                   alt={fixtureData.teams.away.name}
                   className="w-16 h-16 object-contain"
                 />
-                <span className={`font-semibold text-center ${isAZAway ? 'text-az-red' : 'text-az-black dark:text-white'}`}>
+                <span className={`font-semibold text-center text-sm ${isAZAway ? 'text-az-red' : 'text-az-black dark:text-white'}`}>
                   {fixtureData.teams.away.name}
                 </span>
               </div>
@@ -334,7 +380,7 @@ const WedstrijdDetail = () => {
                         {event.assist && <span className="text-premium-gray-600 dark:text-gray-400"> (assist: {event.assist.name})</span>}
                       </div>
                       <div className="text-xs text-premium-gray-600 dark:text-gray-400">
-                        {event.detail} - {event.team.name}
+                        {getEventTypeText(event.type, event.detail)} - {event.team.name}
                       </div>
                     </div>
                   </div>
@@ -364,7 +410,7 @@ const WedstrijdDetail = () => {
                   return (
                     <div key={stat.type} className="space-y-2">
                       <div className="text-center text-sm text-premium-gray-600 dark:text-gray-400 font-medium">
-                        {stat.type}
+                        {translateStatType(stat.type)}
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-center flex-1">
