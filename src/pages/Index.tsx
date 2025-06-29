@@ -42,21 +42,25 @@ const Index = () => {
     <div className="min-h-screen bg-premium-gray-50 dark:bg-gray-900">
       <Header />
       
-      {/* Next Match Widget */}
-      <NextMatchWidget />
+      {/* Next Match Widget with improved spacing */}
+      <div className="mt-8 mb-10">
+        <NextMatchWidget />
+      </div>
       
-      <div className="px-4 pb-20 pt-6">
-        {/* Category Filter */}
-        <CategoryFilter 
-          categories={[]} // No longer needed as we use fixed categories
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
+      <div className="px-4 pb-20">
+        {/* Category Filter with consistent spacing */}
+        <div className="mb-10">
+          <CategoryFilter 
+            categories={[]} // No longer needed as we use fixed categories
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        </div>
 
-        {/* Breaking News Badge */}
+        {/* Breaking News Badge with improved spacing */}
         {breakingNews.length > 0 && (
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-6">
               <span className="breaking-news">🔥 Breaking</span>
               <span className="text-premium-gray-600 dark:text-gray-300 text-sm">
                 {breakingNews.length} {breakingNews.length === 1 ? 'nieuw artikel' : 'nieuwe artikelen'}
@@ -65,41 +69,62 @@ const Index = () => {
           </div>
         )}
 
-        {/* Content */}
-        {isLoading && <ArticlesSkeleton />}
+        {/* Content with improved vertical rhythm */}
+        {isLoading && (
+          <div className="mt-8">
+            <ArticlesSkeleton />
+          </div>
+        )}
         
-        {error && <ErrorMessage onRetry={() => refetch()} />}
+        {error && (
+          <div className="mt-8">
+            <ErrorMessage onRetry={() => refetch()} />
+          </div>
+        )}
         
         {data && !isLoading && !error && (
           <>
-            {/* News Feed with Social Media Promo */}
-            <div className="space-y-6">
+            {/* News Feed with Social Media Promo and consistent spacing */}
+            <div className="space-y-8 mb-12">
               {allArticles.map((article, index) => (
                 <div key={article.id}>
                   <NewsCard article={article} />
-                  {/* Show Social Media Promo after 4th article (index 3) */}
-                  {index === 3 && <SocialMediaPromo />}
+                  {/* Show Social Media Promo after 4th article (index 3) with proper spacing */}
+                  {index === 3 && (
+                    <div className="my-10">
+                      <SocialMediaPromo />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
 
-            {/* Loading skeleton for "Load More" */}
-            {isFetchingNextPage && <LoadMoreSkeleton />}
+            {/* Loading skeleton for "Load More" with consistent spacing */}
+            {isFetchingNextPage && (
+              <div className="mb-8">
+                <LoadMoreSkeleton />
+              </div>
+            )}
 
+            {/* No articles message with improved spacing */}
             {allArticles.length === 0 && !isFetchingNextPage && (
-              <div className="card-premium dark:bg-gray-800 dark:border-gray-700 p-8 text-center">
+              <div className="card-premium dark:bg-gray-800 dark:border-gray-700 p-8 text-center my-8">
                 <p className="body-premium text-premium-gray-600 dark:text-gray-300">
                   Geen artikelen gevonden voor de categorie "{selectedCategory}".
                 </p>
               </div>
             )}
 
-            {/* Popular Articles Section */}
-            {allArticles.length > 0 && <PopularArticles />}
+            {/* Popular Articles Section with improved spacing */}
+            {allArticles.length > 0 && (
+              <div className="mb-12">
+                <PopularArticles />
+              </div>
+            )}
 
-            {/* Load More Button */}
+            {/* Load More Button with consistent spacing */}
             {hasNextPage && allArticles.length > 0 && !isFetchingNextPage && (
-              <div className="mt-8 mb-8 text-center">
+              <div className="mt-10 mb-12 text-center">
                 <Button 
                   onClick={handleLoadMore}
                   className="bg-white hover:bg-premium-gray-50 text-az-black border border-premium-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-gray-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md"
@@ -109,9 +134,9 @@ const Index = () => {
               </div>
             )}
 
-            {/* End of articles message */}
+            {/* End of articles message with proper spacing */}
             {!hasNextPage && allArticles.length > 0 && !isFetchingNextPage && (
-              <div className="mt-8 mb-8 text-center">
+              <div className="mt-10 mb-12 text-center">
                 <p className="text-premium-gray-500 dark:text-gray-400 text-sm">
                   Alle artikelen zijn geladen
                 </p>
