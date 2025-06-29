@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { X, Trash2, CheckCheck, Bell, Goal, Newspaper, Trophy, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -42,11 +43,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'article': return <Newspaper className="w-6 h-6 text-az-red" />;
-      case 'goal': return <Goal className="w-6 h-6 text-az-red" />;
-      case 'match': return <Trophy className="w-6 h-6 text-az-red" />;
-      case 'breaking': return <AlertTriangle className="w-6 h-6 text-az-red" />;
-      default: return <Bell className="w-6 h-6 text-az-red" />;
+      case 'article': return <Newspaper className="w-5 h-5 text-az-red flex-shrink-0" />;
+      case 'goal': return <Goal className="w-5 h-5 text-az-red flex-shrink-0" />;
+      case 'match': return <Trophy className="w-5 h-5 text-az-red flex-shrink-0" />;
+      case 'breaking': return <AlertTriangle className="w-5 h-5 text-az-red flex-shrink-0" />;
+      default: return <Bell className="w-5 h-5 text-az-red flex-shrink-0" />;
     }
   };
 
@@ -92,10 +93,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
               size="sm"
               onClick={() => clearAll.mutate()}
               disabled={clearAll.isPending}
-              className="flex items-center gap-2 border-premium-gray-200 dark:border-gray-700 hover:bg-premium-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-center gap-2 text-premium-gray-700 dark:text-gray-300 border-premium-gray-200 dark:border-gray-700 hover:bg-premium-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <CheckCheck className="w-4 h-4" />
-              Alles gelezen
+              <span className="hidden sm:inline">Alles gelezen</span>
+              <span className="sm:hidden">Alles</span>
             </Button>
           )}
         </div>
@@ -123,34 +125,30 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
         ) : (
           <div className="p-4 space-y-3">
             {notifications.map((notification) => (
-              <div
+              <article
                 key={notification.id}
                 onClick={() => handleNotificationClick(notification)}
-                className={`card-premium cursor-pointer transition-all hover:shadow-md group relative ${
-                  !notification.read
-                    ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/50'
-                    : 'hover:bg-premium-gray-50 dark:hover:bg-gray-800'
-                }`}
+                className="card-premium dark:bg-gray-800 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md group animate-slide-up overflow-hidden"
               >
-                <div className="p-4">
-                  <div className="flex items-start gap-4">
+                <div className="p-4 sm:p-6">
+                  <div className="flex items-start gap-3 sm:gap-4">
                     <div className="flex-shrink-0 mt-1">
                       {getTypeIcon(notification.type)}
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <h3 className={`headline-premium text-headline-sm mb-1 ${
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`headline-premium text-headline-sm mb-2 break-words ${
                             !notification.read 
-                              ? 'text-az-black dark:text-white' 
+                              ? 'text-az-black dark:text-white font-semibold' 
                               : 'text-premium-gray-700 dark:text-gray-300'
                           }`}>
                             {notification.title}
                           </h3>
                           
                           {notification.description && (
-                            <p className={`body-premium text-body-md mb-3 ${
+                            <p className={`body-premium text-body-md mb-4 break-words line-clamp-2 ${
                               !notification.read 
                                 ? 'text-premium-gray-700 dark:text-gray-300' 
                                 : 'text-premium-gray-600 dark:text-gray-400'
@@ -159,39 +157,40 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
                             </p>
                           )}
                           
-                          <div className="flex items-center gap-3">
-                            <Badge 
-                              className="bg-az-red text-white hover:bg-az-red/90 text-xs font-semibold"
-                            >
-                              {getTypeBadge(notification.type)}
-                            </Badge>
-                            
-                            <span className="body-premium text-body-sm text-premium-gray-500 dark:text-gray-400">
-                              {formatDistanceToNow(new Date(notification.created_at), {
-                                addSuffix: true,
-                                locale: nl,
-                              })}
-                            </span>
+                          <div className="flex items-center justify-between flex-wrap gap-2">
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <Badge className="bg-az-red text-white hover:bg-az-red/90 text-xs font-semibold">
+                                {getTypeBadge(notification.type)}
+                              </Badge>
+                              
+                              <span className="body-premium text-body-sm text-premium-gray-500 dark:text-gray-400 whitespace-nowrap">
+                                {formatDistanceToNow(new Date(notification.created_at), {
+                                  addSuffix: true,
+                                  locale: nl,
+                                })}
+                              </span>
+                            </div>
                           </div>
                         </div>
                         
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => handleDeleteClick(e, notification.id)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 flex-shrink-0"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-start gap-2 flex-shrink-0">
+                          {!notification.read && (
+                            <div className="w-2 h-2 bg-az-red rounded-full mt-2"></div>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => handleDeleteClick(e, notification.id)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 p-2"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    
-                    {!notification.read && (
-                      <div className="w-2 h-2 bg-az-red rounded-full flex-shrink-0 mt-2"></div>
-                    )}
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}
