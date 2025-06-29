@@ -103,6 +103,10 @@ interface PlayerStatistics {
 
 interface FootballApiResponse<T> {
   response: T[];
+  paging: {
+    current: number;
+    total: number;
+  };
 }
 
 const callFootballApi = async (endpoint: string, params: Record<string, string> = {}) => {
@@ -129,15 +133,44 @@ export const AZPlayerStats = ({ teamId, isLoadingTeamId }: AZPlayerStatsProps) =
     queryFn: async () => {
       if (!teamId) return [];
       
-      console.log('👥 Fetching AZ player statistics...');
-      const response: FootballApiResponse<PlayerStatistics> = await callFootballApi('/players', {
-        team: teamId.toString(),
-        season: '2024',
-        league: '88' // Eredivisie - main stats
+      const allPlayers: PlayerStatistics[] = [];
+      let currentPage = 1;
+      let totalPages = 1;
+      
+      console.log('👥 Fetching AZ player statistics for season 2025...');
+      
+      // Fetch all pages
+      do {
+        const response: FootballApiResponse<PlayerStatistics> = await callFootballApi('/players', {
+          team: teamId.toString(),
+          season: '2025',
+          league: '88', // Eredivisie
+          page: currentPage.toString()
+        });
+        
+        console.log(`📊 Player Stats Response page ${currentPage}:`, response);
+        
+        if (response.response && response.response.length > 0) {
+          allPlayers.push(...response.response);
+        }
+        
+        totalPages = response.paging?.total || 1;
+        currentPage++;
+      } while (currentPage <= totalPages);
+      
+      console.log(`✅ Total players fetched: ${allPlayers.length}`);
+      
+      // Filter for active players with statistics
+      const activePlayers = allPlayers.filter(player => {
+        const stats = player.statistics[0];
+        return stats && (
+          (stats.games?.appearences && stats.games.appearences > 0) ||
+          (stats.games?.minutes && stats.games.minutes > 0)
+        );
       });
       
-      console.log('📊 Player Stats Response:', response);
-      return response.response || [];
+      console.log(`🔄 Active players with stats: ${activePlayers.length}`);
+      return activePlayers;
     },
     enabled: !!teamId,
     staleTime: 1000 * 60 * 30, // Cache for 30 minutes
@@ -257,7 +290,10 @@ export const AZPlayerStats = ({ teamId, isLoadingTeamId }: AZPlayerStatsProps) =
         {sortedPlayers.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-premium-gray-600 dark:text-gray-300">
-              Geen speler statistieken beschikbaar
+              Geen actuele speler statistieken beschikbaar voor seizoen 2024-2025
+            </p>
+            <p className="text-sm text-premium-gray-500 dark:text-gray-400 mt-2">
+              Mogelijk zijn de statistieken nog niet beschikbaar of wordt een ander seizoen gebruikt.
             </p>
           </div>
         ) : (
