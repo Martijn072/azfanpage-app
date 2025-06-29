@@ -14,7 +14,24 @@ export const DisqusComments = ({ slug, title, articleId }: DisqusCommentsProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentIdentifier, setCurrentIdentifier] = useState<string>('');
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Generate WordPress URL from slug
+  const getWordPressUrl = (slug: string) => {
+    return `https://www.azfanpage.nl/${slug}/`;
+  };
+
+  // Generate possible identifier formats that WordPress might use
+  const getPossibleIdentifiers = (articleId: string, slug: string) => {
+    return [
+      `post-${articleId}`,           // WordPress default format
+      articleId,                     // Simple ID
+      `${articleId} https://www.azfanpage.nl/${slug}/`, // ID + URL format
+      slug,                          // Slug format
+      `https://www.azfanpage.nl/${slug}/`, // Full URL format
+    ];
+  };
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -68,45 +85,30 @@ export const DisqusComments = ({ slug, title, articleId }: DisqusCommentsProps) 
       delete window.disqus_config;
       console.log('Removed global disqus_config');
     }
+
+    // Clear any Disqus iframes that might be lingering
+    const disqusIframes = document.querySelectorAll('iframe[src*="disqus"]');
+    disqusIframes.forEach(iframe => iframe.remove());
   };
 
-  const loadDisqus = async () => {
-    if (isLoaded || isLoading) return;
+  const loadDisqusWithIdentifier = async (identifier: string, wpUrl: string) => {
+    console.log(`🔍 Testing identifier: "${identifier}" with URL: "${wpUrl}"`);
     
-    console.log('🚀 Starting Disqus load process...');
-    setIsLoading(true);
-    setError(null);
-
     // Clean up any existing Disqus first
     cleanupDisqus();
-
-    // Wait for cleanup to complete
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const currentUrl = window.location.href;
-    
-    console.log('📝 Disqus Configuration:', {
-      identifier: articleId,
-      url: currentUrl,
-      title: title,
-      slug: slug
-    });
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     // Check if thread container exists
     const threadContainer = document.getElementById('disqus_thread');
     if (!threadContainer) {
       console.error('❌ Disqus thread container not found');
-      setError('Comments container niet gevonden');
-      setIsLoading(false);
-      return;
+      return false;
     }
 
-    console.log('✅ Disqus thread container found');
-
-    // Configure Disqus with simple, consistent approach
+    // Configure Disqus with WordPress URL and identifier
     window.disqus_config = function () {
-      this.page.url = currentUrl;
-      this.page.identifier = articleId;
+      this.page.url = wpUrl;
+      this.page.identifier = identifier;
       this.page.title = title;
       
       console.log('🔧 Disqus config set:', {
@@ -117,25 +119,91 @@ export const DisqusComments = ({ slug, title, articleId }: DisqusCommentsProps) 
     };
 
     // Create and load new Disqus script
-    const script = document.createElement('script');
-    script.src = 'https://azfanpage.disqus.com/embed.js';
-    script.setAttribute('data-timestamp', String(+new Date()));
-    script.async = true;
-    
-    script.onload = () => {
-      console.log('✅ Disqus script loaded successfully');
-      setIsLoaded(true);
-      setIsLoading(false);
-    };
-    
-    script.onerror = (error) => {
-      console.error('❌ Failed to load Disqus script:', error);
-      setError('Kon comments niet laden');
-      setIsLoading(false);
-      cleanupDisqus();
-    };
+    return new Promise<boolean>((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://azfanpage.disqus.com/embed.js';
+      script.setAttribute('data-timestamp', String(+new Date()));
+      script.async = true;
+      
+      const timeout = setTimeout(() => {
+        console.log(`⏰ Timeout for identifier: ${identifier}`);
+        script.remove();
+        resolve(false);
+      }, 10000);
 
-    document.head.appendChild(script);
+      script.onload = () => {
+        console.log(`✅ Disqus script loaded for identifier: ${identifier}`);
+        clearTimeout(timeout);
+        setCurrentIdentifier(identifier);
+        resolve(true);
+      };
+      
+      script.onerror = (error) => {
+        console.error(`❌ Failed to load Disqus script for identifier: ${identifier}:`, error);
+        clearTimeout(timeout);
+        script.remove();
+        resolve(false);
+      };
+
+      document.head.appendChild(script);
+    });
+  };
+
+  const loadDisqus = async () => {
+    if (isLoaded || isLoading) return;
+    
+    console.log('🚀 Starting Disqus identifier mapping process...');
+    console.log('📋 Article info:', { articleId, slug, title });
+    
+    setIsLoading(true);
+    setError(null);
+
+    const wordpressUrl = getWordPressUrl(slug);
+    const possibleIdentifiers = getPossibleIdentifiers(articleId, slug);
+    
+    console.log('🎯 Testing identifiers:', possibleIdentifiers);
+    console.log('🔗 WordPress URL:', wordpressUrl);
+
+    // Test each identifier format
+    for (const identifier of possibleIdentifiers) {
+      console.log(`🧪 Testing identifier format: ${identifier}`);
+      
+      try {
+        const success = await loadDisqusWithIdentifier(identifier, wordpressUrl);
+        
+        if (success) {
+          console.log(`🎉 SUCCESS! Working identifier: ${identifier}`);
+          setIsLoaded(true);
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.error(`💥 Error testing identifier ${identifier}:`, error);
+      }
+      
+      // Wait between attempts
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    // If all WordPress identifiers fail, try with current page URL as fallback
+    console.log('🔄 All WordPress identifiers failed, trying fallback with current URL...');
+    
+    try {
+      const fallbackSuccess = await loadDisqusWithIdentifier(articleId, window.location.href);
+      
+      if (fallbackSuccess) {
+        console.log('✅ Fallback successful with current URL');
+        setIsLoaded(true);
+      } else {
+        console.error('❌ All identifier formats failed');
+        setError('Kon comments niet laden met geen enkele identifier');
+      }
+    } catch (error) {
+      console.error('💥 Fallback also failed:', error);
+      setError('Kon comments niet laden');
+    }
+    
+    setIsLoading(false);
   };
 
   const resetDisqus = () => {
@@ -143,6 +211,7 @@ export const DisqusComments = ({ slug, title, articleId }: DisqusCommentsProps) 
     setIsLoaded(false);
     setIsLoading(false);
     setError(null);
+    setCurrentIdentifier('');
     cleanupDisqus();
   };
 
@@ -152,6 +221,11 @@ export const DisqusComments = ({ slug, title, articleId }: DisqusCommentsProps) 
         <h3 className="headline-premium text-headline-sm mb-4 text-az-black dark:text-white flex items-center gap-2">
           <MessageCircle className="w-5 h-5 text-az-red" />
           Reacties
+          {currentIdentifier && (
+            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+              ID: {currentIdentifier}
+            </span>
+          )}
         </h3>
         
         {!isLoaded && !isLoading && !error && (
@@ -191,7 +265,7 @@ export const DisqusComments = ({ slug, title, articleId }: DisqusCommentsProps) 
               <div className="text-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-az-red mx-auto mb-4" />
                 <p className="body-premium text-body-sm text-premium-gray-600 dark:text-gray-300">
-                  Reacties worden geladen...
+                  Verschillende identifier formats testen...
                 </p>
               </div>
             )}
@@ -199,11 +273,11 @@ export const DisqusComments = ({ slug, title, articleId }: DisqusCommentsProps) 
           </div>
         )}
 
-        {/* Disqus branding note */}
-        {isLoaded && (
+        {/* Debug info when loaded */}
+        {isLoaded && currentIdentifier && (
           <div className="text-center mt-4">
             <p className="text-xs text-premium-gray-400 dark:text-gray-500">
-              Powered by Disqus
+              Powered by Disqus • Werkende identifier: {currentIdentifier}
             </p>
           </div>
         )}
