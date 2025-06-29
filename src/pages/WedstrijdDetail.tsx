@@ -189,7 +189,10 @@ const WedstrijdDetail = () => {
       'Total passes': 'Totaal passes',
       'Passes accurate': 'Passes juist',
       'Passes %': 'Pass percentage',
-      'Expected Goals': 'Expected Goals'
+      'Expected Goals': 'Verwachte doelpunten',
+      'expected_goals': 'Verwachte doelpunten',
+      'goals_prevented': 'Voorkomen doelpunten',
+      'Pass percentage': 'Pass percentage'
     };
     return translations[type] || type;
   };
