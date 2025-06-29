@@ -75,7 +75,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
       case 'twitter':
         return 'bg-gray-800 text-white hover:bg-gray-900 dark:bg-white dark:text-gray-800 dark:hover:bg-gray-100';
       default:
-        return 'bg-az-red text-white hover:bg-az-red/90';
+        return 'bg-az-red text-white hover:bg-red-700';
     }
   };
 
@@ -99,7 +99,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
               Notificaties
             </h1>
             {unreadCount > 0 && (
-              <Badge className="bg-az-red text-white hover:bg-az-red/90 px-3 py-1 text-sm font-bold">
+              <Badge className="bg-az-red text-white hover:bg-red-700 px-3 py-1 text-sm font-bold">
                 {unreadCount} nieuw
               </Badge>
             )}
@@ -109,7 +109,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
             <Button
               onClick={() => clearAll.mutate()}
               disabled={clearAll.isPending}
-              className="bg-white dark:bg-gray-800 border border-premium-gray-300 dark:border-gray-600 hover:bg-premium-gray-50 dark:hover:bg-gray-700 text-premium-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-semibold transition-colors rounded-lg"
+              className="bg-white dark:bg-gray-800 border border-premium-gray-300 dark:border-gray-600 hover:bg-premium-gray-50 dark:hover:bg-gray-700 text-premium-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-semibold transition-colors rounded-lg focus:ring-2 focus:ring-az-red"
             >
               <CheckCheck className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Alles gelezen</span>
@@ -144,7 +144,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
               <article
                 key={notification.id}
                 onClick={() => handleNotificationClick(notification)}
-                className="card-premium dark:bg-gray-800 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md group animate-slide-up overflow-hidden"
+                className="card-premium dark:bg-gray-800 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md group animate-slide-up overflow-hidden focus:ring-2 focus:ring-az-red"
               >
                 <div className="p-4 sm:p-6">
                   <div className="flex items-start gap-3 sm:gap-4">
@@ -211,7 +211,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
                             variant="ghost"
                             size="sm"
                             onClick={(e) => handleDeleteClick(e, notification.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 p-2"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 p-2 focus:ring-2 focus:ring-az-red"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

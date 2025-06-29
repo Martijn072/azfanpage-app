@@ -63,7 +63,7 @@ export const MoreSheet = ({ children }: MoreSheetProps) => {
               <button
                 key={item.id}
                 onClick={() => handleItemClick(item.path)}
-                className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-premium-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+                className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-premium-gray-50 dark:hover:bg-gray-800 transition-colors text-left focus:ring-2 focus:ring-az-red"
               >
                 <div className="flex-shrink-0 w-10 h-10 bg-az-red/10 dark:bg-az-red/20 rounded-lg flex items-center justify-center">
                   <Icon className="w-5 h-5 text-az-red" />

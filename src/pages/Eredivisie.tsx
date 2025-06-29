@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { EredivisieStandings } from "@/components/EredivisieStandings";
-import { ErrorMessage } from "@/components/ErrorMessage";
 
 const Eredivisie = () => {
   const [activeTab, setActiveTab] = useState("eredivisie");

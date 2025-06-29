@@ -35,7 +35,7 @@ export const Header = () => {
               <img 
                 src="/lovable-uploads/02689d46-9781-412f-9093-feef3e99cfe2.png" 
                 alt="AZ Fanpage Logo" 
-                className="h-10 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+                className="h-10 w-auto cursor-pointer hover:opacity-80 transition-opacity focus:ring-2 focus:ring-az-red rounded"
                 onClick={handleLogoClick}
               />
             </div>
@@ -44,14 +44,14 @@ export const Header = () => {
             <div className="flex items-center gap-3">
               <button 
                 onClick={handleSearchClick}
-                className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:ring-2 focus:ring-az-red"
                 aria-label="Zoeken"
               >
                 <Search className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
               </button>
               <button 
                 onClick={handleNotificationClick}
-                className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative"
+                className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative focus:ring-2 focus:ring-az-red"
                 aria-label="Notificaties"
               >
                 <Bell className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
@@ -63,7 +63,7 @@ export const Header = () => {
               </button>
               <button 
                 onClick={toggleDarkMode}
-                className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:ring-2 focus:ring-az-red"
                 aria-label="Toggle dark mode"
               >
                 {isDarkMode ? (

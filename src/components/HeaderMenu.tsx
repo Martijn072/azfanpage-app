@@ -33,14 +33,14 @@ export const HeaderMenu = () => {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:ring-2 focus:ring-az-red"
         >
           <Menu className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg"
+        className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50"
       >
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -50,7 +50,7 @@ export const HeaderMenu = () => {
             <DropdownMenuItem
               key={item.id}
               onClick={() => handleMenuClick(item.path)}
-              className={`flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors focus:ring-2 focus:ring-az-red ${
                 isActive 
                   ? 'bg-az-red/10 text-az-red dark:bg-az-red/20' 
                   : 'hover:bg-premium-gray-50 dark:hover:bg-gray-700 text-premium-gray-700 dark:text-gray-200'
