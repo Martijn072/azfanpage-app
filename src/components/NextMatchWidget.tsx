@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAZTeamId, useNextAZFixture } from '@/hooks/useFootballApi';
 import { Calendar, Clock } from 'lucide-react';
@@ -12,7 +11,7 @@ export const NextMatchWidget = () => {
 
   if (isLoading) {
     return (
-      <div className="mx-4 mt-4 mb-6">
+      <div className="mb-6">
         <div className="card-premium dark:bg-gray-800 dark:border-gray-700 p-4">
           <div className="animate-pulse">
             <div className="h-3 bg-premium-gray-200 dark:bg-gray-600 rounded w-32 mb-3 mx-auto"></div>
@@ -29,7 +28,7 @@ export const NextMatchWidget = () => {
 
   if (hasError || !nextFixture) {
     return (
-      <div className="mx-4 mt-4 mb-6">
+      <div className="mb-6">
         <div className="card-premium dark:bg-gray-800 dark:border-gray-700 p-4">
           <p className="text-premium-gray-600 dark:text-gray-400 text-center">
             Geen wedstrijd gepland
@@ -71,7 +70,7 @@ export const NextMatchWidget = () => {
   };
 
   return (
-    <div className="mx-4 mt-4 mb-6">
+    <div className="mb-6">
       <div className="card-premium dark:bg-gray-800 dark:border-gray-700 p-4 hover:shadow-lg transition-all duration-200">
         {/* Competitie naam */}
         <div className="text-center mb-4">
