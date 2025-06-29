@@ -1,5 +1,5 @@
 
-import { Bell, Calendar, MessageSquare, MoreHorizontal, House, Users, Table } from "lucide-react";
+import { Bell, Calendar, House, Users, Table } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 interface BottomNavigationProps {
@@ -16,7 +16,7 @@ export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationPro
     { id: "news", label: "Nieuws", icon: Bell, path: "/nieuws" },
     { id: "programma", label: "Programma", icon: Calendar, path: "/programma" },
     { id: "eredivisie", label: "Stand", icon: Table, path: "/eredivisie" },
-    { id: "more", label: "Meer", icon: MoreHorizontal, path: "#" },
+    { id: "spelers", label: "Spelers", icon: Users, path: "/spelers" },
   ];
 
   // Determine active tab based on current route
@@ -32,12 +32,7 @@ export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationPro
   const currentActiveTab = getActiveTab();
 
   const handleTabClick = (tab: any) => {
-    if (tab.path !== "#") {
-      navigate(tab.path);
-    } else if (tab.id === "more") {
-      // Show more options - for now navigate to spelers
-      navigate("/spelers");
-    }
+    navigate(tab.path);
     onTabChange(tab.id);
   };
 

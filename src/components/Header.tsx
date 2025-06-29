@@ -1,7 +1,8 @@
 
-import { Bell, Search, Menu, Moon, Sun } from "lucide-react";
+import { Bell, Search, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDarkMode } from "@/contexts/DarkModeContext";
+import { HeaderMenu } from "./HeaderMenu";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -45,9 +46,7 @@ export const Header = () => {
                 <Moon className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
               )}
             </button>
-            <button className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-              <Menu className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
-            </button>
+            <HeaderMenu />
           </div>
         </div>
       </div>
