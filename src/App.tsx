@@ -9,6 +9,9 @@ import Index from "./pages/Index";
 import News from "./pages/News";
 import ArticleDetail from "./pages/ArticleDetail";
 import ConferenceLeague from "./pages/ConferenceLeague";
+import Eredivisie from "./pages/Eredivisie";
+import AZProgramma from "./pages/AZProgramma";
+import SpelerStatistieken from "./pages/SpelerStatistieken";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +28,9 @@ const App = () => (
             <Route path="/nieuws" element={<News />} />
             <Route path="/artikel/:id" element={<ArticleDetail />} />
             <Route path="/europa" element={<ConferenceLeague />} />
+            <Route path="/eredivisie" element={<Eredivisie />} />
+            <Route path="/programma" element={<AZProgramma />} />
+            <Route path="/spelers" element={<SpelerStatistieken />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -243,13 +243,40 @@ export const useEredivisieStandings = () => {
       console.log('🏆 Fetching Eredivisie standings...');
       const response: FootballApiResponse<{ league: { standings: Standing[][] } }> = await callFootballApi('/standings', {
         league: '88', // Eredivisie league ID
-        season: new Date().getFullYear().toString()
+        season: '2024'
       });
       
       console.log('📊 Standings API Response:', response);
       return response.response[0]?.league.standings[0] || [];
     },
     staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
+// Hook for Conference League fixtures
+export const useConferenceLeagueFixtures = (teamId: number | null) => {
+  return useQuery({
+    queryKey: ['conference-league-fixtures', teamId],
+    queryFn: async () => {
+      if (!teamId) {
+        console.log('⏸️ No team ID available for Conference League fixtures');
+        return [];
+      }
+      
+      console.log('🏆 Fetching Conference League fixtures for AZ...', { teamId });
+      const response: FootballApiResponse<Fixture> = await callFootballApi('/fixtures', {
+        team: teamId.toString(),
+        league: '848', // Conference League ID
+        season: '2024'
+      });
+      
+      console.log('📊 Conference League Fixtures API Response:', response);
+      return response.response || [];
+    },
+    enabled: !!teamId,
+    staleTime: 1000 * 60 * 15, // Cache for 15 minutes
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
