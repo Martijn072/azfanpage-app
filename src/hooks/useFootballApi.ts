@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -137,6 +138,8 @@ export const useAZTeamId = () => {
       return teamId;
     },
     staleTime: 1000 * 60 * 60 * 24, // Cache for 24 hours
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
@@ -161,7 +164,9 @@ export const useAZFixtures = (teamId: number | null, last: number = 5) => {
       return response.response;
     },
     enabled: !!teamId,
-    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    staleTime: 1000 * 60 * 15, // Cache for 15 minutes
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
@@ -187,10 +192,12 @@ export const useNextAZFixture = (teamId: number | null) => {
     },
     enabled: !!teamId,
     staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
-// Hook for live AZ fixture
+// Hook for live AZ fixture - Fixed endpoint
 export const useLiveAZFixture = (teamId: number | null) => {
   return useQuery({
     queryKey: ['live-az-fixture', teamId],
@@ -201,17 +208,30 @@ export const useLiveAZFixture = (teamId: number | null) => {
       }
       
       console.log('🔴 Fetching live AZ fixture...', { teamId });
-      const response: FootballApiResponse<Fixture> = await callFootballApi('/fixtures/live', {
+      // Use the correct fixtures endpoint with live=true parameter instead of /fixtures/live
+      const response: FootballApiResponse<Fixture> = await callFootballApi('/fixtures', {
         team: teamId.toString(),
+        live: 'all',
         timezone: 'Europe/Amsterdam'
       });
       
       console.log('📊 Live Fixture API Response:', response);
-      return response.response[0] || null;
+      
+      // Filter for AZ matches that are currently live
+      const liveAZFixture = response.response.find(fixture => 
+        fixture.fixture.status.short === 'LIVE' || 
+        fixture.fixture.status.short === '1H' || 
+        fixture.fixture.status.short === 'HT' || 
+        fixture.fixture.status.short === '2H'
+      );
+      
+      return liveAZFixture || null;
     },
     enabled: !!teamId,
     refetchInterval: 30000, // Refetch every 30 seconds during live matches
     staleTime: 0, // Don't cache live data
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 };
 
@@ -230,5 +250,7 @@ export const useEredivisieStandings = () => {
       return response.response[0]?.league.standings[0] || [];
     },
     staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };

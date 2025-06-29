@@ -2,12 +2,18 @@
 import { useAZTeamId, useLiveAZFixture, useNextAZFixture } from "@/hooks/useFootballApi";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Clock, Calendar, Wifi, WifiOff } from "lucide-react";
+import { Clock, Calendar, Wifi, WifiOff, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export const LiveScore = () => {
-  const { data: teamId, isLoading: teamLoading, error: teamError } = useAZTeamId();
-  const { data: liveFixture, isLoading: liveLoading, error: liveError } = useLiveAZFixture(teamId);
-  const { data: nextFixture, isLoading: nextLoading, error: nextError } = useNextAZFixture(teamId);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
+  
+  const { data: teamId, isLoading: teamLoading, error: teamError, refetch: refetchTeam } = useAZTeamId();
+  const { data: liveFixture, isLoading: liveLoading, error: liveError, refetch: refetchLive } = useLiveAZFixture(teamId);
+  const { data: nextFixture, isLoading: nextLoading, error: nextError, refetch: refetchNext } = useNextAZFixture(teamId);
 
   // Log API status for debugging
   console.log('🏈 LiveScore API Status:', {
@@ -19,8 +25,33 @@ export const LiveScore = () => {
     hasErrors: !!(teamError || liveError || nextError)
   });
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([
+        refetchTeam(),
+        refetchLive(),
+        refetchNext(),
+      ]);
+      toast({
+        title: "Gegevens bijgewerkt",
+        description: "De laatste wedstrijdgegevens zijn opgehaald.",
+      });
+    } catch (error) {
+      toast({
+        title: "Fout bij bijwerken",
+        description: "Er ging iets mis bij het ophalen van de gegevens.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const isLoading = teamLoading || liveLoading || nextLoading;
+
   // Show loading state
-  if (teamLoading || liveLoading || nextLoading) {
+  if (isLoading && !isRefreshing) {
     return (
       <div className="bg-gradient-to-r from-gray-400 to-gray-500 text-white mx-4 mt-4 rounded-xl p-4 shadow-lg">
         <div className="flex items-center justify-center">
@@ -47,12 +78,12 @@ export const LiveScore = () => {
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                 <span className="text-az-red font-bold text-xs">AZ</span>
               </div>
-              <span className="font-semibold">{azTeam.name}</span>
+              <span className="font-semibold text-sm sm:text-base">{azTeam.name}</span>
             </div>
           </div>
           
-          <div className="text-center px-6">
-            <div className="text-2xl font-bold mb-1">
+          <div className="text-center px-4 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold mb-1">
               {azGoals !== null ? azGoals : '-'} - {opponentGoals !== null ? opponentGoals : '-'}
             </div>
             <div className="text-xs opacity-90">
@@ -62,7 +93,7 @@ export const LiveScore = () => {
           
           <div className="text-center flex-1">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="font-semibold">{opponentTeam.name}</span>
+              <span className="font-semibold text-sm sm:text-base">{opponentTeam.name}</span>
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                 <img 
                   src={opponentTeam.logo} 
@@ -80,10 +111,21 @@ export const LiveScore = () => {
               <span className="animate-pulse">🔴</span>
               <span>LIVE</span>
             </div>
-            <span>{liveFixture.league.name}</span>
-            <div className="flex items-center gap-1">
-              <Wifi className="w-3 h-3" />
-              <span>API Connected</span>
+            <span className="hidden sm:inline">{liveFixture.league.name}</span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost" 
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="h-6 px-2 text-white hover:bg-white/10"
+              >
+                <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+              <div className="flex items-center gap-1">
+                <Wifi className="w-3 h-3" />
+                <span className="hidden sm:inline">Live</span>
+              </div>
             </div>
           </div>
         </div>
@@ -106,11 +148,11 @@ export const LiveScore = () => {
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                 <span className="text-az-red font-bold text-xs">AZ</span>
               </div>
-              <span className="font-semibold">{azTeam.name}</span>
+              <span className="font-semibold text-sm sm:text-base">{azTeam.name}</span>
             </div>
           </div>
           
-          <div className="text-center px-6">
+          <div className="text-center px-4 sm:px-6">
             <div className="text-lg font-bold mb-1">VS</div>
             <div className="text-xs opacity-90 flex items-center justify-center gap-1">
               <Clock className="w-3 h-3" />
@@ -120,7 +162,7 @@ export const LiveScore = () => {
           
           <div className="text-center flex-1">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="font-semibold">{opponentTeam.name}</span>
+              <span className="font-semibold text-sm sm:text-base">{opponentTeam.name}</span>
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                 <img 
                   src={opponentTeam.logo} 
@@ -138,10 +180,21 @@ export const LiveScore = () => {
               <Calendar className="w-3 h-3" />
               <span>{format(matchDate, 'dd MMM', { locale: nl })}</span>
             </div>
-            <span>{nextFixture.league.name}</span>
-            <div className="flex items-center gap-1">
-              <Wifi className="w-3 h-3" />
-              <span>API Connected</span>
+            <span className="hidden sm:inline">{nextFixture.league.name}</span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost" 
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="h-6 px-2 text-white hover:bg-white/10"
+              >
+                <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+              <div className="flex items-center gap-1">
+                <Wifi className="w-3 h-3" />
+                <span className="hidden sm:inline">Online</span>
+              </div>
             </div>
           </div>
         </div>
@@ -159,18 +212,18 @@ export const LiveScore = () => {
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                 <span className="text-gray-600 font-bold text-xs">AZ</span>
               </div>
-              <span className="font-semibold">AZ Alkmaar</span>
+              <span className="font-semibold text-sm sm:text-base">AZ Alkmaar</span>
             </div>
           </div>
           
-          <div className="text-center px-6">
+          <div className="text-center px-4 sm:px-6">
             <div className="text-lg font-bold mb-1">API</div>
             <div className="text-xs opacity-90">Verbinding</div>
           </div>
           
           <div className="text-center flex-1">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="font-semibold">Tegenstander</span>
+              <span className="font-semibold text-sm sm:text-base">Tegenstander</span>
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                 <span className="text-gray-600 font-bold text-xs">?</span>
               </div>
@@ -184,8 +237,19 @@ export const LiveScore = () => {
               <WifiOff className="w-3 h-3" />
               <span>API Fout</span>
             </div>
-            <span>Probeer later opnieuw</span>
-            <span className="text-xs">Fallback modus</span>
+            <span className="hidden sm:inline">Probeer later opnieuw</span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost" 
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="h-6 px-2 text-white hover:bg-white/10"
+              >
+                <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+              <span className="text-xs">Opnieuw</span>
+            </div>
           </div>
         </div>
       </div>
@@ -201,18 +265,18 @@ export const LiveScore = () => {
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
               <span className="text-az-red font-bold text-xs">AZ</span>
             </div>
-            <span className="font-semibold">AZ Alkmaar</span>
+            <span className="font-semibold text-sm sm:text-base">AZ Alkmaar</span>
           </div>
         </div>
         
-        <div className="text-center px-6">
-          <div className="text-2xl font-bold mb-1">2 - 1</div>
+        <div className="text-center px-4 sm:px-6">
+          <div className="text-xl sm:text-2xl font-bold mb-1">2 - 1</div>
           <div className="text-xs opacity-90">67' ⚽ LIVE</div>
         </div>
         
         <div className="text-center flex-1">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="font-semibold">PSV</span>
+            <span className="font-semibold text-sm sm:text-base">PSV</span>
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
               <span className="text-red-600 font-bold text-xs">PSV</span>
             </div>
@@ -223,10 +287,21 @@ export const LiveScore = () => {
       <div className="mt-3 pt-3 border-t border-white/20">
         <div className="flex justify-between items-center text-xs opacity-90">
           <span>⚪🔴 Demo Data</span>
-          <span>AFAS Stadion • Eredivisie</span>
-          <div className="flex items-center gap-1">
-            <WifiOff className="w-3 h-3" />
-            <span>Offline</span>
+          <span className="hidden sm:inline">AFAS Stadion • Eredivisie</span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost" 
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="h-6 px-2 text-white hover:bg-white/10"
+            >
+              <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+            <div className="flex items-center gap-1">
+              <WifiOff className="w-3 h-3" />
+              <span>Offline</span>
+            </div>
           </div>
         </div>
       </div>
