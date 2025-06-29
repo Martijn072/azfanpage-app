@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
@@ -264,7 +265,7 @@ const WedstrijdDetail = () => {
         <Button 
           variant="ghost" 
           onClick={() => navigate(-1)}
-          className="mb-4 p-2"
+          className="mb-4 p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Terug
@@ -280,7 +281,7 @@ const WedstrijdDetail = () => {
               {fixtureData.fixture.status.short === 'LIVE' && (
                 <Badge 
                   variant="default"
-                  className="bg-red-500 text-white"
+                  className="bg-az-red text-white hover:bg-red-700"
                 >
                   {getStatusText(fixtureData.fixture.status.short)}
                 </Badge>
@@ -357,28 +358,28 @@ const WedstrijdDetail = () => {
         {eventsData && eventsData.length > 0 && (
           <Card className="mb-6 bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-az-black dark:text-white">
+                <Clock className="w-5 h-5 text-az-red" />
                 Wedstrijdverloop
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {eventsData.map((event, index) => (
-                  <div key={index} className="flex items-center gap-3 p-2 bg-premium-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="w-8 text-center font-semibold text-sm">
+                  <div key={index} className="flex items-center gap-3 p-3 bg-premium-gray-50 dark:bg-gray-700 rounded-lg border border-premium-gray-100 dark:border-gray-600">
+                    <div className="w-8 text-center font-bold text-sm bg-az-red text-white rounded px-1 py-1">
                       {event.time.elapsed}'
                     </div>
                     <div className="text-lg">
                       {getEventIcon(event.type)}
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-sm">
+                      <div className="font-semibold text-sm text-az-black dark:text-white">
                         {event.player.name}
-                        {event.assist && <span className="text-premium-gray-600 dark:text-gray-400"> (assist: {event.assist.name})</span>}
+                        {event.assist && <span className="text-premium-gray-600 dark:text-gray-400 font-normal"> (assist: {event.assist.name})</span>}
                       </div>
                       <div className="text-xs text-premium-gray-600 dark:text-gray-400">
-                        {getEventTypeText(event.type, event.detail)} - {event.team.name}
+                        {getEventTypeText(event.type, event.detail)} - <span className="font-medium text-az-red">{event.team.name}</span>
                       </div>
                     </div>
                   </div>
@@ -392,8 +393,8 @@ const WedstrijdDetail = () => {
         {statsData && statsData.length > 0 && (
           <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-az-black dark:text-white">
+                <Target className="w-5 h-5 text-az-red" />
                 Statistieken
               </CardTitle>
             </CardHeader>
@@ -412,11 +413,19 @@ const WedstrijdDetail = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-center flex-1">
-                          <span className="font-semibold">{homeStat.value}</span>
+                          <span className="font-bold text-az-red">{homeStat.value}</span>
                         </div>
                         <div className="text-center flex-1">
-                          <span className="font-semibold">{awayStat.value}</span>
+                          <span className="font-bold text-az-red">{awayStat.value}</span>
                         </div>
+                      </div>
+                      <div className="h-2 bg-premium-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-az-red transition-all duration-300"
+                          style={{ 
+                            width: `${(parseFloat(String(homeStat.value)) / (parseFloat(String(homeStat.value)) + parseFloat(String(awayStat.value)))) * 100}%` 
+                          }}
+                        />
                       </div>
                     </div>
                   );
