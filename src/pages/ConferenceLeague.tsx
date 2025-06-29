@@ -27,19 +27,7 @@ const ConferenceLeague = () => {
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <Header />
       
-      <main className="px-4 pb-20 pt-8 bg-white dark:bg-gray-900 min-h-screen">
-        {/* Hero Section */}
-        <div className="mb-12 bg-white dark:bg-gray-900">
-          <div className="max-w-4xl">
-            <h1 className="headline-premium text-headline-xl mb-2 text-az-black dark:text-white leading-tight">
-              Conference League
-            </h1>
-            <p className="text-premium-gray-500 dark:text-gray-400 text-sm font-light">
-              2024-2025
-            </p>
-          </div>
-        </div>
-
+      <main className="px-4 pb-20 pt-6 bg-white dark:bg-gray-900 min-h-screen">
         {/* Conference League Standings */}
         <div className="mb-8 bg-white dark:bg-gray-900">
           <ConferenceLeagueStandings />

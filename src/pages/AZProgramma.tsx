@@ -26,19 +26,7 @@ const AZProgramma = () => {
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <Header />
       
-      <div className="px-4 pb-20 pt-8">
-        {/* Hero Section */}
-        <div className="mb-12">
-          <div className="max-w-4xl">
-            <h1 className="headline-premium text-headline-xl mb-2 text-az-black dark:text-white leading-tight">
-              AZ Wedstrijdprogramma
-            </h1>
-            <p className="text-premium-gray-500 dark:text-gray-400 text-sm font-light">
-              2024-2025
-            </p>
-          </div>
-        </div>
-
+      <div className="px-4 pb-20 pt-6">
         {/* AZ Fixtures */}
         <div>
           <AZFixtures teamId={teamId} isLoadingTeamId={teamIdLoading} />
