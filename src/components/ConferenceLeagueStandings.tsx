@@ -139,7 +139,7 @@ export const ConferenceLeagueStandings = () => {
                   return (
                     <TableRow 
                       key={`${standing.group}-${standing.team.id}`}
-                      className={isAZ ? 'bg-az-red/10 border-az-red/20' : ''}
+                      className={isAZ ? 'border-az-red/30' : ''}
                     >
                       <TableCell className="font-medium">
                         <span className={isAZ ? 'text-az-red font-bold' : ''}>
