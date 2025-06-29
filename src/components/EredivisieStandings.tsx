@@ -1,3 +1,4 @@
+
 import { useEredivisieStandings } from '@/hooks/useFootballApi';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,14 +46,14 @@ export const EredivisieStandings = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-white hover:bg-white border-b border-gray-200">
-                  <TableHead className="w-12">#</TableHead>
-                  <TableHead>Team</TableHead>
-                  <TableHead className="text-center w-12">Wed</TableHead>
-                  <TableHead className="text-center w-12">W</TableHead>
-                  <TableHead className="text-center w-12">G</TableHead>
-                  <TableHead className="text-center w-12">V</TableHead>
-                  <TableHead className="text-center w-16">Doelpunten</TableHead>
-                  <TableHead className="text-center w-12">Ptn</TableHead>
+                  <TableHead className="w-12 text-gray-900 dark:text-white font-semibold">#</TableHead>
+                  <TableHead className="text-gray-900 dark:text-white font-semibold">Team</TableHead>
+                  <TableHead className="text-center w-12 text-gray-900 dark:text-white font-semibold">Wed</TableHead>
+                  <TableHead className="text-center w-12 text-gray-900 dark:text-white font-semibold">W</TableHead>
+                  <TableHead className="text-center w-12 text-gray-900 dark:text-white font-semibold">G</TableHead>
+                  <TableHead className="text-center w-12 text-gray-900 dark:text-white font-semibold">V</TableHead>
+                  <TableHead className="text-center w-16 text-gray-900 dark:text-white font-semibold">Doelpunten</TableHead>
+                  <TableHead className="text-center w-12 text-gray-900 dark:text-white font-semibold">Ptn</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="bg-white">
