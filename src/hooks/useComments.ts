@@ -124,7 +124,7 @@ export const useLikeComment = () => {
         .single();
 
       if (existingLike) {
-        // Unlike
+        // Unlike: remove the like
         const { error } = await supabase
           .from('comment_likes')
           .delete()
@@ -133,17 +133,26 @@ export const useLikeComment = () => {
 
         if (error) throw error;
 
-        // Decrease likes count
-        const { error: updateError } = await supabase
+        // Get current likes count and decrease by 1
+        const { data: currentComment } = await supabase
           .from('comments')
-          .update({ likes_count: supabase.sql`likes_count - 1` })
-          .eq('id', commentId);
+          .select('likes_count')
+          .eq('id', commentId)
+          .single();
 
-        if (updateError) throw updateError;
+        if (currentComment) {
+          const newCount = Math.max(0, (currentComment.likes_count || 0) - 1);
+          const { error: updateError } = await supabase
+            .from('comments')
+            .update({ likes_count: newCount })
+            .eq('id', commentId);
+
+          if (updateError) throw updateError;
+        }
         
         return { action: 'unliked' };
       } else {
-        // Like
+        // Like: add the like
         const { error } = await supabase
           .from('comment_likes')
           .insert({
@@ -153,13 +162,22 @@ export const useLikeComment = () => {
 
         if (error) throw error;
 
-        // Increase likes count
-        const { error: updateError } = await supabase
+        // Get current likes count and increase by 1
+        const { data: currentComment } = await supabase
           .from('comments')
-          .update({ likes_count: supabase.sql`likes_count + 1` })
-          .eq('id', commentId);
+          .select('likes_count')
+          .eq('id', commentId)
+          .single();
 
-        if (updateError) throw updateError;
+        if (currentComment) {
+          const newCount = (currentComment.likes_count || 0) + 1;
+          const { error: updateError } = await supabase
+            .from('comments')
+            .update({ likes_count: newCount })
+            .eq('id', commentId);
+
+          if (updateError) throw updateError;
+        }
         
         return { action: 'liked' };
       }
