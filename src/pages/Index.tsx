@@ -8,6 +8,7 @@ import { CategoryFilter } from "@/components/CategoryFilter";
 import { ArticlesSkeleton } from "@/components/ArticlesSkeleton";
 import { LoadMoreSkeleton } from "@/components/LoadMoreSkeleton";
 import { ErrorMessage } from "@/components/ErrorMessage";
+import { SocialMediaPromo } from "@/components/SocialMediaPromo";
 import { useInfiniteArticles } from "@/hooks/useInfiniteArticles";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -72,10 +73,14 @@ const Index = () => {
         
         {data && !isLoading && !error && (
           <>
-            {/* News Feed */}
+            {/* News Feed with Social Media Promo */}
             <div className="space-y-6">
-              {allArticles.map((article) => (
-                <NewsCard key={article.id} article={article} />
+              {allArticles.map((article, index) => (
+                <div key={article.id}>
+                  <NewsCard article={article} />
+                  {/* Show Social Media Promo after 4th article (index 3) */}
+                  {index === 3 && <SocialMediaPromo />}
+                </div>
               ))}
             </div>
 
