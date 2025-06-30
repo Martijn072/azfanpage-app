@@ -6,7 +6,10 @@ import { Users, RefreshCw } from "lucide-react";
 export const CommunitySection = () => {
   const { data: posts, isLoading, error, refetch } = useSocialMediaPosts();
 
+  console.log('CommunitySection render:', { posts, isLoading, error });
+
   if (error) {
+    console.error('CommunitySection error:', error);
     return (
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
@@ -18,7 +21,7 @@ export const CommunitySection = () => {
         
         <div className="card-premium dark:bg-gray-800 p-8 text-center">
           <p className="body-premium text-body-lg text-premium-gray-600 dark:text-gray-300 mb-4">
-            Kan social media content niet laden
+            Kan social media content niet laden: {error.message}
           </p>
           <button
             onClick={() => refetch()}
@@ -54,6 +57,7 @@ export const CommunitySection = () => {
   }
 
   if (!posts || posts.length === 0) {
+    console.log('No posts found, showing empty state');
     return (
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
@@ -65,12 +69,21 @@ export const CommunitySection = () => {
         
         <div className="card-premium dark:bg-gray-800 p-8 text-center">
           <p className="body-premium text-body-lg text-premium-gray-600 dark:text-gray-300">
-            Geen recente social media posts gevonden met #azalkmaar
+            Geen recente social media posts gevonden. Probeer later opnieuw.
           </p>
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-2 bg-az-red hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 mx-auto mt-4"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Vernieuw
+          </button>
         </div>
       </section>
     );
   }
+
+  console.log(`Rendering ${posts.length} social media posts`);
 
   return (
     <section className="mb-12">
@@ -90,15 +103,18 @@ export const CommunitySection = () => {
       
       {/* Vertical list voor mobile-first */}
       <div className="space-y-4">
-        {posts.slice(0, 6).map((post, index) => (
-          <div 
-            key={post.id}
-            className="animate-fade-in"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            <SocialMediaCard post={post} />
-          </div>
-        ))}
+        {posts.slice(0, 6).map((post, index) => {
+          console.log('Rendering post:', post.id, post.platform);
+          return (
+            <div 
+              key={post.id}
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <SocialMediaCard post={post} />
+            </div>
+          );
+        })}
       </div>
       
       {posts.length > 6 && (

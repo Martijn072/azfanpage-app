@@ -26,24 +26,38 @@ export const useSocialMediaPosts = () => {
     queryFn: async (): Promise<SocialMediaPost[]> => {
       console.log('🔄 Fetching social media posts...');
       
-      const { data, error } = await supabase.functions.invoke('social-media-rss');
-      
-      if (error) {
-        console.error('❌ Error fetching social media posts:', error);
-        throw new Error('Failed to fetch social media posts');
+      try {
+        const { data, error } = await supabase.functions.invoke('social-media-rss');
+        
+        console.log('Raw response from edge function:', { data, error });
+        
+        if (error) {
+          console.error('❌ Error from Supabase function:', error);
+          throw new Error(`Supabase function error: ${error.message || 'Unknown error'}`);
+        }
+        
+        if (!data) {
+          console.error('❌ No data received from function');
+          throw new Error('No data received from social media function');
+        }
+        
+        if (!data.success) {
+          console.error('❌ Function returned unsuccessful response:', data);
+          throw new Error(data.error || 'Function returned unsuccessful response');
+        }
+        
+        const posts = data.posts || [];
+        console.log(`✅ Successfully received ${posts.length} social media posts:`, posts);
+        
+        return posts;
+      } catch (error) {
+        console.error('❌ Full error in useSocialMediaPosts:', error);
+        throw error;
       }
-      
-      if (!data || !data.success) {
-        console.error('❌ Invalid response format:', data);
-        throw new Error('Invalid response format');
-      }
-      
-      console.log(`✅ Successfully fetched ${data.posts.length} social media posts`);
-      return data.posts || [];
     },
     staleTime: 15 * 60 * 1000, // 15 minutes
     gcTime: 60 * 60 * 1000, // 1 hour
     refetchOnWindowFocus: false,
-    retry: 2,
+    retry: 1, // Reduce retries to avoid long loading times
   });
 };

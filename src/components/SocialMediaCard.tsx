@@ -20,7 +20,10 @@ interface SocialMediaCardProps {
 }
 
 export const SocialMediaCard = ({ post }: SocialMediaCardProps) => {
+  console.log('Rendering SocialMediaCard for post:', post.id);
+
   const handleViewPost = () => {
+    console.log('Opening post URL:', post.post_url);
     window.open(post.post_url, '_blank', 'noopener,noreferrer');
   };
 
@@ -40,10 +43,15 @@ export const SocialMediaCard = ({ post }: SocialMediaCardProps) => {
   };
 
   const config = platformConfig[post.platform];
+  if (!config) {
+    console.error('Unknown platform:', post.platform);
+    return null;
+  }
+
   const PlatformIcon = config.icon;
 
   return (
-    <article className="card-premium dark:bg-gray-800 dark:border-gray-700 overflow-hidden animate-slide-up w-full max-w-full group transform transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+    <article className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-premium-gray-200 dark:border-gray-700 overflow-hidden w-full max-w-full group transform transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
       {/* Header met platform badge */}
       <div className="p-4 pb-0">
         <div className="flex items-center justify-between mb-3">
@@ -53,6 +61,10 @@ export const SocialMediaCard = ({ post }: SocialMediaCardProps) => {
                 src={post.profile_photo} 
                 alt={`${post.username} profile`}
                 className="w-8 h-8 rounded-full object-cover"
+                onError={(e) => {
+                  console.log('Profile photo failed to load:', post.profile_photo);
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-premium-gray-200 dark:bg-gray-600 flex items-center justify-center">
@@ -86,6 +98,10 @@ export const SocialMediaCard = ({ post }: SocialMediaCardProps) => {
             src={post.image_url} 
             alt="Social media post"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              console.log('Post image failed to load:', post.image_url);
+              e.currentTarget.parentElement?.remove();
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
@@ -93,14 +109,14 @@ export const SocialMediaCard = ({ post }: SocialMediaCardProps) => {
 
       {/* Content */}
       <div className="p-4">
-        <p className="body-premium text-body-md text-premium-gray-700 dark:text-gray-300 mb-4 line-clamp-3 break-words">
+        <p className="text-premium-gray-700 dark:text-gray-300 mb-4 line-clamp-3 break-words text-sm">
           {post.content}
         </p>
 
         {/* View post button */}
         <button 
           onClick={handleViewPost}
-          className={`flex items-center gap-2 bg-az-red hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-lg hover:scale-105 active:scale-95 text-sm w-full justify-center group/btn`}
+          className="flex items-center gap-2 bg-az-red hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-lg hover:scale-105 active:scale-95 text-sm w-full justify-center group/btn"
         >
           <span>Bekijk op {config.name}</span>
           <ExternalLink className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />

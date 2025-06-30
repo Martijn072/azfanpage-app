@@ -7,6 +7,8 @@ import { useState } from "react";
 const Community = () => {
   const [activeTab, setActiveTab] = useState("community");
 
+  console.log('Community page rendering');
+
   return (
     <div className="min-h-screen bg-premium-gray-50 dark:bg-gray-900">
       <Header />
