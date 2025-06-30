@@ -1,4 +1,3 @@
-
 import { NewsCard } from "@/components/NewsCard";
 import { NextMatchWidget } from "@/components/NextMatchWidget";
 import { EredivisieStandings } from "@/components/EredivisieStandings";
@@ -15,6 +14,7 @@ import { LoadMoreSkeleton } from "@/components/LoadMoreSkeleton";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { articleCache } from "@/services/articleCache";
+import { CommunitySection } from "@/components/CommunitySection";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
@@ -107,6 +107,11 @@ const Index = () => {
           {/* Next Match Widget */}
           <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <NextMatchWidget />
+          </div>
+          
+          {/* Community Section - Social Media Posts */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.15s' }}>
+            <CommunitySection />
           </div>
           
           {/* News Section */}
