@@ -26,7 +26,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🔄 Starting RSS feed parsing...');
+    console.log('🔄 Starting RSS feed parsing (Instagram only)...');
     
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -39,33 +39,55 @@ serve(async (req) => {
     try {
       console.log('📷 Fetching Instagram posts for AZ Alkmaar...');
       
-      // Probeer verschillende zoekopdrachten
+      // Probeer verschillende Instagram zoekopdrachten
       const instagramQueries = [
-        'https://rss-bridge.org/bridge01/?action=display&bridge=InstagramBridge&context=Username&u=az&format=Json',
-        'https://rss-bridge.org/bridge01/?action=display&bridge=InstagramBridge&context=Hashtag&h=azfanpage&format=Json'
+        {
+          url: 'https://rss-bridge.org/bridge01/?action=display&bridge=InstagramBridge&context=Username&u=az&format=Json',
+          name: 'AZ Official Account'
+        },
+        {
+          url: 'https://rss-bridge.org/bridge01/?action=display&bridge=InstagramBridge&context=Hashtag&h=azfanpage&format=Json',
+          name: 'AZFanpage Hashtag'
+        },
+        {
+          url: 'https://rss-bridge.org/bridge01/?action=display&bridge=InstagramBridge&context=Hashtag&h=azalkmaar&format=Json',
+          name: 'AZ Alkmaar Hashtag'
+        }
       ];
       
-      for (const instagramUrl of instagramQueries) {
+      for (const query of instagramQueries) {
         try {
-          const instagramResponse = await fetch(instagramUrl, {
+          console.log(`📷 Trying Instagram: ${query.name}...`);
+          
+          const instagramResponse = await fetch(query.url, {
             headers: {
               'User-Agent': 'Mozilla/5.0 (compatible; AZ-Fanpage-Bot/1.0)',
               'Accept': 'application/json'
-            }
+            },
+            signal: AbortSignal.timeout(15000) // 15 second timeout
           });
           
-          console.log(`📷 Instagram response status for ${instagramUrl}: ${instagramResponse.status}`);
+          console.log(`📷 Instagram response status for ${query.name}: ${instagramResponse.status}`);
           
           if (instagramResponse.ok) {
             const instagramData = await instagramResponse.json();
-            console.log(`📷 Instagram data received:`, Object.keys(instagramData));
+            console.log(`📷 Instagram data keys:`, Object.keys(instagramData));
             
             if (instagramData.items && Array.isArray(instagramData.items)) {
+              console.log(`📷 Found ${instagramData.items.length} items for ${query.name}`);
+              
               for (const item of instagramData.items.slice(0, 5)) {
+                console.log('📷 Processing item:', {
+                  id: item.id,
+                  author: item.author,
+                  hasImage: !!item.image,
+                  hasUrl: !!item.url
+                });
+                
                 posts.push({
                   id: `instagram_${item.id || item.uri || Math.random().toString(36)}`,
                   platform: 'instagram',
-                  username: item.author || 'Unknown',
+                  username: item.author || 'az_official',
                   content: (item.content_text || item.title || 'Instagram post').substring(0, 150),
                   image_url: item.image,
                   post_url: item.url,
@@ -73,127 +95,53 @@ serve(async (req) => {
                   cached_at: new Date().toISOString()
                 });
               }
+            } else {
+              console.log(`📷 No items found for ${query.name}`);
             }
-            
-            console.log(`✅ Found ${instagramData.items?.length || 0} Instagram posts`);
+          } else {
+            console.log(`📷 Instagram request failed for ${query.name}: ${instagramResponse.status}`);
           }
         } catch (error) {
-          console.error(`❌ Instagram RSS error for ${instagramUrl}:`, error);
+          console.error(`❌ Instagram RSS error for ${query.name}:`, error.message);
         }
       }
     } catch (error) {
       console.error('❌ Instagram RSS error:', error);
     }
 
-    // Parse Twitter RSS via Nitter - zoek naar AZ Alkmaar + #AZFanpage
-    const nitterInstances = [
-      'https://nitter.net',
-      'https://nitter.it', 
-      'https://nitter.privacydev.net'
-    ];
-
-    const twitterQueries = [
-      'AZ%20Alkmaar',
-      '%23AZFanpage',
-      '%23azalkmaar'
-    ];
-
-    for (const nitterBase of nitterInstances) {
-      for (const query of twitterQueries) {
-        try {
-          console.log(`🐦 Fetching Twitter posts from ${nitterBase} for query: ${decodeURIComponent(query)}...`);
-          const twitterUrl = `${nitterBase}/search/rss?q=${query}`;
-          
-          const twitterResponse = await fetch(twitterUrl, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (compatible; AZ-Fanpage-Bot/1.0)',
-              'Accept': 'application/rss+xml, application/xml, text/xml'
-            },
-            timeout: 10000 // 10 second timeout
-          });
-          
-          console.log(`🐦 Twitter response status from ${nitterBase} for ${query}: ${twitterResponse.status}`);
-          
-          if (twitterResponse.ok) {
-            const twitterXml = await twitterResponse.text();
-            console.log(`🐦 Twitter XML length: ${twitterXml.length}`);
-            
-            // Parse XML manually for Twitter RSS
-            const itemRegex = /<item>(.*?)<\/item>/gs;
-            const items = [...twitterXml.matchAll(itemRegex)];
-            
-            for (const match of items.slice(0, 5)) {
-              const itemContent = match[1];
-              
-              const titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/);
-              const linkMatch = itemContent.match(/<link>(.*?)<\/link>/);
-              const pubDateMatch = itemContent.match(/<pubDate>(.*?)<\/pubDate>/);
-              const descriptionMatch = itemContent.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/);
-              const guidMatch = itemContent.match(/<guid.*?>(.*?)<\/guid>/);
-              
-              if (titleMatch && linkMatch) {
-                const username = titleMatch[1].split(':')[0] || 'Unknown';
-                const content = (descriptionMatch?.[1] || titleMatch[1]).substring(0, 150);
-                
-                posts.push({
-                  id: `twitter_${guidMatch?.[1] || linkMatch[1]}_${query}`,
-                  platform: 'twitter',
-                  username: username.replace('@', ''),
-                  content: content.replace(/<[^>]*>/g, ''), // Strip HTML tags
-                  post_url: linkMatch[1],
-                  published_at: pubDateMatch?.[1] ? new Date(pubDateMatch[1]).toISOString() : new Date().toISOString(),
-                  cached_at: new Date().toISOString()
-                });
-              }
-            }
-            
-            console.log(`✅ Found ${items.length} Twitter posts from ${nitterBase} for ${query}`);
-            
-            if (items.length > 0) {
-              break; // Stop als we posts hebben gevonden voor deze query
-            }
-          }
-        } catch (error) {
-          console.error(`❌ Twitter RSS error from ${nitterBase} for ${query}:`, error);
-          continue;
-        }
-      }
-      
-      if (posts.filter(p => p.platform === 'twitter').length > 0) {
-        break; // Stop als we Twitter posts hebben van deze instance
-      }
-    }
+    console.log(`📊 Total Instagram posts found: ${posts.length}`);
 
     // Add some test data if no posts found (voor development/testing)
     if (posts.length === 0) {
-      console.log('⚠️ No posts found, adding test data...');
+      console.log('⚠️ No Instagram posts found, adding test data...');
       posts.push(
         {
           id: 'test_instagram_1',
           platform: 'instagram',
           username: 'az_official',
           content: 'Test Instagram post over AZ Alkmaar - onze geweldige club! #AZFanpage',
-          image_url: 'https://via.placeholder.com/400x300?text=AZ+Instagram',
-          post_url: 'https://instagram.com/p/test',
-          published_at: new Date().toISOString(),
+          image_url: 'https://via.placeholder.com/400x300/FF0000/FFFFFF?text=AZ+Instagram',
+          post_url: 'https://instagram.com/p/test1',
+          published_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 min ago
           cached_at: new Date().toISOString()
         },
         {
-          id: 'test_twitter_1',
-          platform: 'twitter',
-          username: 'az_supporter',
-          content: 'Fantastische wedstrijd van AZ vandaag! Trots op onze club. #AZFanpage',
-          post_url: 'https://twitter.com/az_supporter/status/test',
-          published_at: new Date().toISOString(),
+          id: 'test_instagram_2',
+          platform: 'instagram',
+          username: 'azfanpage',
+          content: 'Fantastische wedstrijd van AZ vandaag! Trots op onze club.',
+          image_url: 'https://via.placeholder.com/400x300/CC0000/FFFFFF?text=AZ+Wedstrijd',
+          post_url: 'https://instagram.com/p/test2',
+          published_at: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1 hour ago
           cached_at: new Date().toISOString()
         },
         {
-          id: 'test_twitter_2',
-          platform: 'twitter',
+          id: 'test_instagram_3',
+          platform: 'instagram',
           username: 'alkmaar_fan',
-          content: 'AZ Alkmaar speelt geweldig dit seizoen! Hoop op meer mooie wedstrijden.',
-          post_url: 'https://twitter.com/alkmaar_fan/status/test2',
-          published_at: new Date().toISOString(),
+          content: 'AZ Alkmaar speelt geweldig dit seizoen! Hoop op meer mooie wedstrijden. #azalkmaar',
+          post_url: 'https://instagram.com/p/test3',
+          published_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(), // 1.5 hours ago
           cached_at: new Date().toISOString()
         }
       );
@@ -208,13 +156,21 @@ serve(async (req) => {
       )
     );
 
-    console.log(`💾 Returning ${uniquePosts.length} unique posts (${posts.length} total before deduplication)...`);
+    // Sort by published date (newest first)
+    uniquePosts.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+
+    console.log(`💾 Returning ${uniquePosts.length} unique Instagram posts...`);
     
     return new Response(
       JSON.stringify({
         success: true,
-        posts: uniquePosts.slice(0, 20), // Limit to latest 20 posts
-        cached_at: new Date().toISOString()
+        posts: uniquePosts.slice(0, 10), // Limit to latest 10 posts
+        cached_at: new Date().toISOString(),
+        debug: {
+          total_found: posts.length,
+          unique_count: uniquePosts.length,
+          platform: 'instagram_only'
+        }
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -227,8 +183,13 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({
+        success: false,
         error: 'Failed to parse RSS feeds',
-        details: error.message
+        details: error.message,
+        debug: {
+          platform: 'instagram_only',
+          timestamp: new Date().toISOString()
+        }
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
