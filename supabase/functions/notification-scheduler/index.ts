@@ -24,35 +24,14 @@ serve(async (req) => {
 
     const results = {
       timestamp: new Date().toISOString(),
-      social_media_result: null as any,
       articles_result: null as any,
+      football_result: null as any,
       success: true,
       errors: [] as string[]
     }
 
-    // Call social media fetcher
-    console.log('🐦 Calling social media fetcher...')
-    try {
-      const { data: socialData, error: socialError } = await supabaseClient.functions.invoke('social-media-fetcher', {
-        body: {}
-      })
-      
-      if (socialError) {
-        console.error('❌ Social media fetcher error:', socialError)
-        results.errors.push(`Social media error: ${socialError.message}`)
-        results.social_media_result = { success: false, error: socialError.message }
-      } else {
-        console.log('✅ Social media fetcher success:', socialData)
-        results.social_media_result = socialData
-      }
-    } catch (error) {
-      console.error('❌ Social media fetcher exception:', error)
-      results.errors.push(`Social media exception: ${error.message}`)
-      results.social_media_result = { success: false, error: error.message }
-    }
-
     // Call articles fetcher in notifications mode
-    console.log('📰 Calling articles fetcher...')
+    console.log('📰 Checking for new articles...')
     try {
       const { data: articlesData, error: articlesError } = await supabaseClient.functions.invoke('fetch-articles', {
         body: { mode: 'notifications', perPage: 20 }
@@ -72,13 +51,96 @@ serve(async (req) => {
       results.articles_result = { success: false, error: error.message }
     }
 
+    // Check for live football matches and create notifications
+    console.log('⚽ Checking for live football updates...')
+    try {
+      const { data: footballData, error: footballError } = await supabaseClient.functions.invoke('football-api', {
+        body: { 
+          endpoint: '/fixtures',
+          params: {
+            team: '201', // AZ Alkmaar team ID
+            live: 'all',
+            timezone: 'Europe/Amsterdam'
+          }
+        }
+      })
+      
+      if (footballError) {
+        console.error('❌ Football API error:', footballError)
+        results.errors.push(`Football error: ${footballError.message}`)
+        results.football_result = { success: false, error: footballError.message }
+      } else {
+        console.log('✅ Football API success:', footballData)
+        
+        // Check if there are any live matches
+        const liveMatches = footballData.response?.filter(match => 
+          match.fixture.status.short === 'LIVE' || 
+          match.fixture.status.short === '1H' || 
+          match.fixture.status.short === 'HT' || 
+          match.fixture.status.short === '2H'
+        ) || []
+
+        console.log(`🔴 Found ${liveMatches.length} live matches`)
+
+        let notificationsCreated = 0
+        
+        for (const match of liveMatches) {
+          const isAZHome = match.teams.home.name.toLowerCase().includes('az')
+          const azTeam = isAZHome ? match.teams.home : match.teams.away
+          const opponentTeam = isAZHome ? match.teams.away : match.teams.home
+          const azGoals = isAZHome ? match.goals.home : match.goals.away
+          const opponentGoals = isAZHome ? match.goals.away : match.goals.home
+
+          // Check if we already have a notification for this match
+          const { data: existingNotification } = await supabaseClient
+            .from('notifications')
+            .select('id')
+            .eq('type', 'match')
+            .eq('match_id', match.fixture.id.toString())
+            .single()
+
+          if (!existingNotification) {
+            // Create live match notification
+            const { error: notificationError } = await supabaseClient
+              .from('notifications')
+              .insert({
+                type: 'match',
+                title: `🔴 LIVE: ${azTeam.name} vs ${opponentTeam.name}`,
+                description: `${azGoals}-${opponentGoals} • ${match.fixture.status.elapsed}' • ${match.league.name}`,
+                icon: '⚽',
+                match_id: match.fixture.id.toString(),
+                read: false
+              })
+
+            if (notificationError) {
+              console.error(`❌ Error creating match notification:`, notificationError)
+            } else {
+              console.log(`✅ Created live match notification: ${azTeam.name} vs ${opponentTeam.name}`)
+              notificationsCreated++
+            }
+          }
+        }
+
+        results.football_result = {
+          success: true,
+          live_matches: liveMatches.length,
+          notifications_created: notificationsCreated,
+          checked_matches: footballData.response?.length || 0
+        }
+      }
+    } catch (error) {
+      console.error('❌ Football API exception:', error)
+      results.errors.push(`Football exception: ${error.message}`)
+      results.football_result = { success: false, error: error.message }
+    }
+
     // Set overall success status
     results.success = results.errors.length === 0
 
     console.log('📋 Scheduler Summary:')
     console.log(`  ✅ Success: ${results.success}`)
-    console.log(`  🐦 Social Media: ${results.social_media_result?.success !== false ? '✅' : '❌'}`)
     console.log(`  📰 Articles: ${results.articles_result?.success !== false ? '✅' : '❌'}`)
+    console.log(`  ⚽ Football: ${results.football_result?.success !== false ? '✅' : '❌'}`)
     console.log(`  ❌ Errors: ${results.errors.length}`)
 
     return new Response(

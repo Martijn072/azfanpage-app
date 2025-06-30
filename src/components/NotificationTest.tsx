@@ -103,19 +103,21 @@ export const NotificationTest: React.FC = () => {
             </span>
           </div>
           
-          {lastResult.social_media_result && (
-            <div className="text-xs text-premium-gray-600 dark:text-gray-400 mb-1">
-              🐦 Social Media: {lastResult.social_media_result.success !== false ? 'OK' : 'Fout'}
-              {lastResult.social_media_result.new_twitter_posts !== undefined && 
-                ` (${lastResult.social_media_result.new_twitter_posts} nieuwe tweets)`}
-            </div>
-          )}
-          
           {lastResult.articles_result && (
             <div className="text-xs text-premium-gray-600 dark:text-gray-400 mb-1">
               📰 Artikelen: {lastResult.articles_result.success !== false ? 'OK' : 'Fout'}
               {lastResult.articles_result.newArticles !== undefined && 
                 ` (${lastResult.articles_result.newArticles} nieuwe artikelen)`}
+            </div>
+          )}
+          
+          {lastResult.football_result && (
+            <div className="text-xs text-premium-gray-600 dark:text-gray-400 mb-1">
+              ⚽ Voetbal: {lastResult.football_result.success !== false ? 'OK' : 'Fout'}
+              {lastResult.football_result.live_matches !== undefined && 
+                ` (${lastResult.football_result.live_matches} live wedstrijden)`}
+              {lastResult.football_result.notifications_created !== undefined && 
+                ` (${lastResult.football_result.notifications_created} nieuwe notificaties)`}
             </div>
           )}
           
