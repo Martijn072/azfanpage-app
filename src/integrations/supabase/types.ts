@@ -97,6 +97,82 @@ export type Database = {
           },
         ]
       }
+      media_reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          media_id: string
+          reason: string
+          reporter_identifier: string | null
+          reporter_user_id: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          media_id: string
+          reason: string
+          reporter_identifier?: string | null
+          reporter_user_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          media_id?: string
+          reason?: string
+          reporter_identifier?: string | null
+          reporter_user_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_reports_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "supporter_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_votes: {
+        Row: {
+          created_at: string
+          id: string
+          media_id: string
+          user_id: string | null
+          user_identifier: string | null
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_id: string
+          user_id?: string | null
+          user_identifier?: string | null
+          vote_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_id?: string
+          user_id?: string | null
+          user_identifier?: string | null
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_votes_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "supporter_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           comment_mentions: boolean | null
@@ -199,6 +275,63 @@ export type Database = {
           article_url?: string | null
           id?: string
           processed_at?: string
+        }
+        Relationships: []
+      }
+      supporter_media: {
+        Row: {
+          caption: string | null
+          created_at: string
+          file_size: number
+          file_type: string
+          file_url: string
+          filename: string
+          hashtags: string[] | null
+          id: string
+          is_approved: boolean | null
+          is_featured: boolean | null
+          original_filename: string
+          reports_count: number | null
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+          votes_count: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          file_size: number
+          file_type: string
+          file_url: string
+          filename: string
+          hashtags?: string[] | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          original_filename: string
+          reports_count?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+          votes_count?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          filename?: string
+          hashtags?: string[] | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          original_filename?: string
+          reports_count?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+          votes_count?: number | null
         }
         Relationships: []
       }
