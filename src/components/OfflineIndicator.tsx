@@ -12,6 +12,7 @@ interface OfflineIndicatorProps {
 export const OfflineIndicator = ({ onSyncNow, issyncing = false }: OfflineIndicatorProps) => {
   const { isOnline, lastSync } = useOfflineDetection();
 
+  // Only show when offline OR when we have sync info to display
   if (isOnline && !lastSync) return null;
 
   return (

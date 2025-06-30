@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Bell, Search, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -5,14 +6,12 @@ import { useDarkMode } from "@/contexts/DarkModeContext";
 import { HeaderMenu } from "./HeaderMenu";
 import { SearchOverlay } from "./SearchOverlay";
 import { useNotifications } from "@/hooks/useNotifications";
-import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 export const Header = () => {
   const navigate = useNavigate();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { unreadCount } = useNotifications();
-  const [isSyncing, setIsSyncing] = useState(false);
 
   const handleLogoClick = () => {
     navigate("/");
@@ -26,21 +25,8 @@ export const Header = () => {
     navigate("/notificaties");
   };
 
-  const handleManualSync = () => {
-    setIsSyncing(true);
-    // Simulate sync process
-    setTimeout(() => {
-      setIsSyncing(false);
-    }, 2000);
-  };
-
   return (
-    <>
-      <OfflineIndicator 
-        onSyncNow={handleManualSync}
-        issyncing={isSyncing}
-      />
-      
+    <>      
       <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-premium-gray-200 dark:border-gray-700 shadow-sm transition-colors duration-200">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between">
