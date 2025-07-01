@@ -1,7 +1,6 @@
 
 import { NewsCard } from "@/components/NewsCard";
 import { NextMatchWidget } from "@/components/NextMatchWidget";
-import { EredivisieStandings } from "@/components/EredivisieStandings";
 import { SocialMediaPromo } from "@/components/SocialMediaPromo";
 import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -154,11 +153,6 @@ const Index = () => {
               </>
             )}
           </section>
-
-          {/* Eredivisie Standings */}
-          <div className="animate-fade-in mb-12" style={{ animationDelay: '0.3s' }}>
-            <EredivisieStandings />
-          </div>
           
           {/* Social Media Promo */}
           <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>

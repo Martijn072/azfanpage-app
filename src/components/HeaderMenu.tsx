@@ -33,7 +33,7 @@ export const HeaderMenu = () => {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:ring-2 focus:ring-az-red"
+          className="p-2 hover:bg-az-red/10 dark:hover:bg-az-red/20 rounded-lg transition-colors focus:ring-2 focus:ring-az-red"
         >
           <Menu className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
         </Button>
@@ -53,7 +53,7 @@ export const HeaderMenu = () => {
               className={`flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors focus:ring-2 focus:ring-az-red ${
                 isActive 
                   ? 'bg-az-red/10 text-az-red dark:bg-az-red/20' 
-                  : 'hover:bg-premium-gray-50 dark:hover:bg-gray-700 text-premium-gray-700 dark:text-gray-200'
+                  : 'hover:bg-az-red/5 dark:hover:bg-az-red/10 text-premium-gray-700 dark:text-gray-200 hover:text-az-red dark:hover:text-az-red'
               }`}
             >
               <Icon className={`w-4 h-4 ${isActive ? 'text-az-red' : ''}`} />

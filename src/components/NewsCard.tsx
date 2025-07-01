@@ -66,14 +66,6 @@ export const NewsCard = ({ article }: NewsCardProps) => {
           {article.category}
         </div>
         
-        {/* Offline availability indicator */}
-        {isCached && (
-          <div className="absolute bottom-4 left-4 bg-green-500/80 backdrop-blur-md border border-white/20 px-2 py-1 rounded-lg text-xs font-semibold text-white shadow-lg flex items-center gap-1">
-            <Download className="w-3 h-3" />
-            <span>Offline</span>
-          </div>
-        )}
-        
         {/* Overlay gradient on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
