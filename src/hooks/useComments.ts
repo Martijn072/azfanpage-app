@@ -6,23 +6,37 @@ import { useToast } from '@/hooks/use-toast';
 export interface Comment {
   id: string;
   article_id: string;
-  user_id: string | null;
-  author_name: string;
-  author_email: string | null;
-  author_avatar: string | null;
-  content: string;
+  user_id: string;
   parent_id: string | null;
-  likes_count: number;
+  content: string;
+  content_html: string | null;
   is_approved: boolean;
   is_pinned: boolean;
+  is_edited: boolean;
+  edit_count: number;
+  last_edited_at: string | null;
+  likes_count: number;
+  dislikes_count: number;
+  reports_count: number;
+  is_hidden: boolean;
+  hidden_reason: string | null;
+  spam_score: number;
+  reply_count: number;
+  depth: number;
   created_at: string;
   updated_at: string;
   replies?: Comment[];
+  user_profiles?: {
+    id: string;
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+    reputation: number;
+    is_verified: boolean;
+  };
 }
 
 export interface CommentFormData {
-  author_name: string;
-  author_email?: string;
   content: string;
   parent_id?: string;
 }
@@ -31,22 +45,33 @@ export const useComments = (articleId: string) => {
   const { toast } = useToast();
   
   const { data: comments = [], isLoading } = useQuery({
-    queryKey: ['comments', articleId],
+    queryKey: ['secure_comments', articleId],
     queryFn: async () => {
-      console.log('🔍 Fetching comments for article:', articleId);
+      console.log('🔍 Fetching secure comments for article:', articleId);
       const { data, error } = await supabase
-        .from('comments')
-        .select('*')
+        .from('secure_comments')
+        .select(`
+          *,
+          user_profiles (
+            id,
+            username,
+            display_name,
+            avatar_url,
+            reputation,
+            is_verified
+          )
+        `)
         .eq('article_id', articleId)
         .eq('is_approved', true)
+        .eq('is_hidden', false)
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('❌ Error fetching comments:', error);
+        console.error('❌ Error fetching secure comments:', error);
         throw error;
       }
       
-      console.log('✅ Comments fetched:', data);
+      console.log('✅ Secure comments fetched:', data);
       
       // Organize comments with replies
       const organizedComments = organizeCommentsWithReplies(data as Comment[]);
@@ -66,38 +91,37 @@ export const useAddComment = () => {
 
   return useMutation({
     mutationFn: async ({ articleId, commentData }: { articleId: string; commentData: CommentFormData }) => {
-      console.log('💬 Adding new comment:', commentData);
+      console.log('💬 Adding new secure comment:', commentData);
       const { data, error } = await supabase
-        .from('comments')
+        .from('secure_comments')
         .insert({
           article_id: articleId,
-          author_name: commentData.author_name,
-          author_email: commentData.author_email,
+          user_id: (await supabase.auth.getUser()).data.user?.id!,
           content: commentData.content,
           parent_id: commentData.parent_id || null,
-          author_avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${commentData.author_name}`,
+          is_approved: false, // Will be approved by moderation
         })
         .select()
         .single();
 
       if (error) {
-        console.error('❌ Error adding comment:', error);
+        console.error('❌ Error adding secure comment:', error);
         throw error;
       }
 
-      console.log('✅ Comment added:', data);
+      console.log('✅ Secure comment added:', data);
       return data;
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['comments', variables.articleId] });
+      queryClient.invalidateQueries({ queryKey: ['secure_comments', variables.articleId] });
       toast({
         title: "Reactie geplaatst",
-        description: "Je reactie is succesvol toegevoegd!",
+        description: "Je reactie wordt gecontroleerd en verschijnt binnenkort.",
         className: "bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700 text-premium-gray-900 dark:text-white",
       });
     },
     onError: (error) => {
-      console.error('❌ Error in add comment mutation:', error);
+      console.error('❌ Error in add secure comment mutation:', error);
       toast({
         title: "Fout",
         description: "Kon reactie niet plaatsen. Probeer het opnieuw.",
@@ -112,84 +136,64 @@ export const useLikeComment = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ commentId, userIdentifier }: { commentId: string; userIdentifier: string }) => {
-      console.log('👍 Toggling like for comment:', commentId);
+    mutationFn: async ({ commentId, reactionType }: { commentId: string; reactionType: 'like' | 'dislike' }) => {
+      console.log('👍 Toggling reaction for comment:', commentId, reactionType);
       
-      // Check if already liked
-      const { data: existingLike } = await supabase
-        .from('comment_likes')
-        .select('id')
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      if (!userId) throw new Error('User not authenticated');
+
+      // Check if already reacted
+      const { data: existingReaction } = await supabase
+        .from('comment_reactions')
+        .select('id, reaction_type')
         .eq('comment_id', commentId)
-        .eq('user_identifier', userIdentifier)
+        .eq('user_id', userId)
         .single();
 
-      if (existingLike) {
-        // Unlike: remove the like
-        const { error } = await supabase
-          .from('comment_likes')
-          .delete()
-          .eq('comment_id', commentId)
-          .eq('user_identifier', userIdentifier);
+      if (existingReaction) {
+        if (existingReaction.reaction_type === reactionType) {
+          // Remove reaction if same type
+          const { error } = await supabase
+            .from('comment_reactions')
+            .delete()
+            .eq('comment_id', commentId)
+            .eq('user_id', userId);
 
-        if (error) throw error;
+          if (error) throw error;
+          return { action: 'removed', reactionType };
+        } else {
+          // Update reaction if different type
+          const { error } = await supabase
+            .from('comment_reactions')
+            .update({ reaction_type: reactionType })
+            .eq('comment_id', commentId)
+            .eq('user_id', userId);
 
-        // Get current likes count and decrease by 1
-        const { data: currentComment } = await supabase
-          .from('comments')
-          .select('likes_count')
-          .eq('id', commentId)
-          .single();
-
-        if (currentComment) {
-          const newCount = Math.max(0, (currentComment.likes_count || 0) - 1);
-          const { error: updateError } = await supabase
-            .from('comments')
-            .update({ likes_count: newCount })
-            .eq('id', commentId);
-
-          if (updateError) throw updateError;
+          if (error) throw error;
+          return { action: 'updated', reactionType };
         }
-        
-        return { action: 'unliked' };
       } else {
-        // Like: add the like
+        // Add new reaction
         const { error } = await supabase
-          .from('comment_likes')
+          .from('comment_reactions')
           .insert({
             comment_id: commentId,
-            user_identifier: userIdentifier,
+            user_id: userId,
+            reaction_type: reactionType,
           });
 
         if (error) throw error;
-
-        // Get current likes count and increase by 1
-        const { data: currentComment } = await supabase
-          .from('comments')
-          .select('likes_count')
-          .eq('id', commentId)
-          .single();
-
-        if (currentComment) {
-          const newCount = (currentComment.likes_count || 0) + 1;
-          const { error: updateError } = await supabase
-            .from('comments')
-            .update({ likes_count: newCount })
-            .eq('id', commentId);
-
-          if (updateError) throw updateError;
-        }
-        
-        return { action: 'liked' };
+        return { action: 'added', reactionType };
       }
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['comments'] });
+      queryClient.invalidateQueries({ queryKey: ['secure_comments'] });
     },
     onError: (error) => {
-      console.error('❌ Error toggling like:', error);
+      console.error('❌ Error toggling reaction:', error);
       toast({
         title: "Fout",
-        description: "Kon reactie niet liken. Probeer het opnieuw.",
+        description: "Kon reactie niet registreren. Probeer het opnieuw.",
         variant: "destructive",
       });
     },
