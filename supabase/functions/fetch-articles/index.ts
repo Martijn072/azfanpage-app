@@ -17,7 +17,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { articleId, page = 1, perPage = 20, search = '', category = '', mode } = body;
+    const { articleId, articleSlug, page = 1, perPage = 20, search = '', category = '', mode } = body;
 
     // Handle notifications mode - check for new articles and create notifications
     if (mode === 'notifications') {
@@ -104,9 +104,9 @@ serve(async (req) => {
       );
     }
 
-    // If articleId is provided, fetch single article
-    if (articleId) {
-      const article = await fetchSingleWordPressArticle(articleId);
+    // If articleId or articleSlug is provided, fetch single article
+    if (articleId || articleSlug) {
+      const article = await fetchSingleWordPressArticle(articleId || articleSlug);
 
       return new Response(
         JSON.stringify({ article }),

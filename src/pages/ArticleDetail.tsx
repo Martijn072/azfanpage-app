@@ -80,32 +80,41 @@ const ArticleDetail = () => {
       console.log('🔗 Found internal link:', originalUrl);
       
       // Try to extract article ID from various URL patterns
-      let articleId = null;
+      let articleIdentifier = null;
       
       // Pattern 1: URL with article ID at the end
       const idPattern1 = /\/(\d+)\/?$/;
       const idMatch1 = originalUrl.match(idPattern1);
       if (idMatch1) {
-        articleId = idMatch1[1];
+        articleIdentifier = idMatch1[1];
       } else {
         // Pattern 2: Look for article ID in the URL path segments
         const urlParts = originalUrl.split('/');
         for (const part of urlParts) {
           if (/^\d+$/.test(part) && parseInt(part) > 1000) { // Assuming article IDs are > 1000
-            articleId = part;
+            articleIdentifier = part;
             break;
           }
         }
       }
       
-      if (articleId) {
-        console.log('✅ Converting internal link to app route:', `/artikel/${articleId}`);
-        // Replace with internal app link with data attribute for navigation
-        return `<a href="#" data-internal-link="/artikel/${articleId}" data-original-url="${originalUrl}" class="internal-link text-az-red hover:text-red-700 underline">${linkText}</a>`;
+      // Pattern 3: Extract slug from URL (last segment before trailing slash)
+      if (!articleIdentifier) {
+        const slugMatch = originalUrl.match(/\/([^\/]+)\/?$/);
+        if (slugMatch && slugMatch[1] && slugMatch[1] !== 'www.azfanpage.nl') {
+          articleIdentifier = slugMatch[1];
+          console.log('📝 Extracted slug:', articleIdentifier);
+        }
       }
       
-      console.log('❌ Could not extract article ID from:', originalUrl);
-      return match; // Return original if we can't parse the ID
+      if (articleIdentifier) {
+        console.log('✅ Converting internal link to app route:', `/artikel/${articleIdentifier}`);
+        // Replace with internal app link with data attribute for navigation
+        return `<a href="#" data-internal-link="/artikel/${articleIdentifier}" data-original-url="${originalUrl}" class="internal-link text-az-red hover:text-red-700 underline">${linkText}</a>`;
+      }
+      
+      console.log('❌ Could not extract article identifier from:', originalUrl);
+      return match; // Return original if we can't parse the identifier
     });
   };
 

@@ -1,6 +1,7 @@
 
 export interface WordPressPost {
   id: number;
+  slug: string;
   title: { rendered: string };
   excerpt: { rendered: string };
   content: { rendered: string };
@@ -24,6 +25,7 @@ export interface WordPressCategory {
 
 export interface Article {
   id: number;
+  slug: string;
   title: string;
   excerpt: string;
   content: string;

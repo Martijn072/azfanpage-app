@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface ArticleDetail {
   id: number;
+  slug: string;
   title: string;
   excerpt: string;
   content: string;
@@ -13,17 +14,22 @@ interface ArticleDetail {
   category: string;
   isBreaking: boolean;
   readTime: string;
-  slug: string; // Add slug for Disqus
 }
 
-export const useArticleDetail = (id: string) => {
+export const useArticleDetail = (identifier: string) => {
   return useQuery({
-    queryKey: ['article-detail', id],
+    queryKey: ['article-detail', identifier],
     queryFn: async (): Promise<ArticleDetail> => {
-      console.log(`Fetching article detail for ID: ${id}`);
+      console.log(`Fetching article detail for identifier: ${identifier}`);
+      
+      // Check if identifier is numeric (ID) or text (slug)
+      const isNumericId = /^\d+$/.test(identifier);
+      const body = isNumericId 
+        ? { articleId: identifier }
+        : { articleSlug: identifier };
       
       const { data, error } = await supabase.functions.invoke('fetch-articles', {
-        body: { articleId: id }
+        body
       });
       
       if (error) {

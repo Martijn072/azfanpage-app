@@ -50,6 +50,7 @@ export const transformPost = (post: WordPressPost): Article => {
 
   return {
     id: post.id,
+    slug: post.slug,
     title: cleanHtmlContent(post.title.rendered),
     excerpt: excerpt,
     content: post.content.rendered, // Full content for article detail
@@ -58,8 +59,7 @@ export const transformPost = (post: WordPressPost): Article => {
     imageUrl: featuredImage,
     category: category,
     isBreaking: isBreaking,
-    readTime: `${Math.ceil(post.content.rendered.split(' ').length / 200)} min`,
-    slug: post.slug // Add WordPress slug for Disqus identifier
+    readTime: `${Math.ceil(post.content.rendered.split(' ').length / 200)} min`
   };
 };
 
@@ -132,25 +132,41 @@ export const fetchWordPressArticles = async (
   };
 };
 
-export const fetchSingleWordPressArticle = async (articleId: string) => {
-  console.log(`Fetching single article ${articleId} from azfanpage.nl WordPress API...`);
+export const fetchSingleWordPressArticle = async (articleIdentifier: string) => {
+  console.log(`Fetching single article ${articleIdentifier} from azfanpage.nl WordPress API...`);
   
-  const response = await fetch(
-    `https://azfanpage.nl/wp-json/wp/v2/posts/${articleId}?_embed`,
-    {
-      headers: {
-        'User-Agent': 'AZFanpage-App/1.0',
-      },
-    }
-  );
+  // Check if identifier is numeric (ID) or text (slug)
+  const isNumericId = /^\d+$/.test(articleIdentifier);
+  
+  let url: string;
+  if (isNumericId) {
+    url = `https://azfanpage.nl/wp-json/wp/v2/posts/${articleIdentifier}?_embed`;
+  } else {
+    url = `https://azfanpage.nl/wp-json/wp/v2/posts?slug=${articleIdentifier}&_embed`;
+  }
+  
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'AZFanpage-App/1.0',
+    },
+  });
 
   if (!response.ok) {
     console.error('Failed to fetch article from WordPress API:', response.status, response.statusText);
     throw new Error(`WordPress API returned ${response.status}`);
   }
 
-  const post: WordPressPost = await response.json();
-  console.log(`Successfully fetched article ${articleId}`);
-
+  let post: WordPressPost;
+  if (isNumericId) {
+    post = await response.json();
+  } else {
+    const posts: WordPressPost[] = await response.json();
+    if (!posts || posts.length === 0) {
+      throw new Error(`Article with slug "${articleIdentifier}" not found`);
+    }
+    post = posts[0];
+  }
+  
+  console.log(`Successfully fetched article ${articleIdentifier}`);
   return transformPost(post);
 };
