@@ -1,5 +1,4 @@
 
-import { useTranslation } from "react-i18next";
 import { Bell, Calendar, House, Table, MoreHorizontal } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MoreSheet } from "./MoreSheet";
@@ -10,15 +9,14 @@ interface BottomNavigationProps {
 }
 
 export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
   const tabs = [
-    { id: "home", label: t('navigation.news'), icon: House, path: "/" },
-    { id: "news", label: t('navigation.news'), icon: Bell, path: "/nieuws" },
-    { id: "programma", label: t('navigation.az_program'), icon: Calendar, path: "/programma" },
-    { id: "eredivisie", label: t('navigation.eredivisie'), icon: Table, path: "/eredivisie" },
+    { id: "home", label: "Home", icon: House, path: "/" },
+    { id: "news", label: "Nieuws", icon: Bell, path: "/nieuws" },
+    { id: "programma", label: "Programma", icon: Calendar, path: "/programma" },
+    { id: "eredivisie", label: "Stand", icon: Table, path: "/eredivisie" },
   ];
 
   // Determine active tab based on current route
@@ -76,7 +74,7 @@ export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationPro
           >
             <MoreHorizontal className={`w-5 h-5 ${currentActiveTab === "meer" ? 'text-az-red' : ''}`} />
             <span className={`text-xs font-medium ${currentActiveTab === "meer" ? 'text-az-red' : ''}`}>
-              {t('common.more')}
+              Meer
             </span>
           </button>
         </MoreSheet>
