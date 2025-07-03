@@ -70,6 +70,13 @@ const ArticleDetail = () => {
   const displayArticle = article || (cachedArticle && !isOnline ? cachedArticle : null);
   const isShowingCachedContent = !article && cachedArticle && !isOnline;
 
+  // Debug logging
+  console.log('🔍 ArticleDetail render:', { 
+    displayArticle: !!displayArticle, 
+    players: players?.length || 0,
+    playersData: players 
+  });
+
   // Process article content to add player links
   const processedContent = displayArticle?.content 
     ? addPlayerLinksToContent(displayArticle.content, players || [])
