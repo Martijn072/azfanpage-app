@@ -101,27 +101,12 @@ const ArticleDetail = () => {
       if (articleId) {
         console.log('✅ Converting internal link to app route:', `/artikel/${articleId}`);
         // Replace with internal app link with data attribute for navigation
-        return `<a href="#" data-internal-link="/artikel/${articleId}" class="internal-link text-az-red hover:text-red-700 underline">${linkText}</a>`;
+        return `<a href="#" data-internal-link="/artikel/${articleId}" data-original-url="${originalUrl}" class="internal-link text-az-red hover:text-red-700 underline">${linkText}</a>`;
       }
       
       console.log('❌ Could not extract article ID from:', originalUrl);
       return match; // Return original if we can't parse the ID
     });
-  };
-
-  // Handle clicks on internal links
-  const handleContentClick = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    const link = target.closest('a[data-internal-link]') as HTMLAnchorElement;
-    
-    if (link) {
-      e.preventDefault();
-      const internalRoute = link.getAttribute('data-internal-link');
-      if (internalRoute) {
-        console.log('🚀 Navigating to internal route:', internalRoute);
-        navigate(internalRoute);
-      }
-    }
   };
 
   // Use cached content if offline and no online data
@@ -132,6 +117,71 @@ const ArticleDetail = () => {
   const processedContent = displayArticle?.content 
     ? convertInternalLinks(displayArticle.content)
     : displayArticle?.excerpt || '';
+
+  // Setup click handlers for internal links after content is rendered
+  useEffect(() => {
+    if (!displayArticle) return;
+
+    const setupInternalLinks = () => {
+      const articleContent = document.querySelector('.article-content');
+      if (!articleContent) return;
+
+      const internalLinks = articleContent.querySelectorAll('a[data-internal-link]');
+      
+      console.log(`🔧 Setting up ${internalLinks.length} internal links`);
+      
+      internalLinks.forEach((link) => {
+        const handleClick = (e: Event) => {
+          e.preventDefault();
+          const target = e.currentTarget as HTMLAnchorElement;
+          const internalRoute = target.getAttribute('data-internal-link');
+          const originalUrl = target.getAttribute('data-original-url');
+          
+          if (internalRoute) {
+            console.log('🚀 Navigating to internal route:', internalRoute, 'from:', originalUrl);
+            navigate(internalRoute);
+          }
+        };
+
+        // Remove existing listener to avoid duplicates
+        link.removeEventListener('click', handleClick);
+        // Add new listener
+        link.addEventListener('click', handleClick);
+      });
+    };
+
+    // Run setup after a small delay to ensure DOM is updated
+    const timeoutId = setTimeout(setupInternalLinks, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      // Cleanup: remove event listeners
+      const articleContent = document.querySelector('.article-content');
+      if (articleContent) {
+        const internalLinks = articleContent.querySelectorAll('a[data-internal-link]');
+        internalLinks.forEach((link) => {
+          // Clone node to remove all event listeners
+          const newLink = link.cloneNode(true);
+          link.parentNode?.replaceChild(newLink, link);
+        });
+      }
+    };
+  }, [displayArticle, processedContent, navigate]);
+
+  // Handle clicks on internal links (fallback)
+  const handleContentClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const link = target.closest('a[data-internal-link]') as HTMLAnchorElement;
+    
+    if (link) {
+      e.preventDefault();
+      const internalRoute = link.getAttribute('data-internal-link');
+      if (internalRoute) {
+        console.log('🚀 Fallback navigation to internal route:', internalRoute);
+        navigate(internalRoute);
+      }
+    }
+  };
 
   // Show loading state when we're loading and don't have cached content
   if (isLoading && !cachedArticle) {
