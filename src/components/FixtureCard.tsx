@@ -9,6 +9,7 @@ interface FixtureCardProps {
   getCompetitionName: (leagueId: number, leagueName: string) => string;
   getCompetitionBadgeVariant: (leagueId: number) => "default" | "secondary" | "destructive" | "outline";
   translateRound: (round: string) => string;
+  normalizeVenueName?: (venueName: string | undefined, homeTeamName: string, awayTeamName: string) => string;
 }
 
 export const FixtureCard = ({ 
@@ -17,7 +18,8 @@ export const FixtureCard = ({
   formatDate, 
   getCompetitionName, 
   getCompetitionBadgeVariant, 
-  translateRound 
+  translateRound,
+  normalizeVenueName
 }: FixtureCardProps) => {
   return (
     <div 
@@ -91,7 +93,12 @@ export const FixtureCard = ({
       <div className="flex items-center justify-between mt-3 text-xs sm:text-sm">
         <div className="flex items-center gap-1 text-premium-gray-600 dark:text-gray-300">
           <MapPin className="w-3 h-3" />
-          <span className="truncate">{fixture.fixture.venue?.name || 'Onbekend'}</span>
+          <span className="truncate">
+            {normalizeVenueName 
+              ? normalizeVenueName(fixture.fixture.venue?.name, fixture.teams.home.name, fixture.teams.away.name)
+              : fixture.fixture.venue?.name || 'Onbekend'
+            }
+          </span>
         </div>
         <Badge 
           variant="outline" 

@@ -17,6 +17,12 @@ const seasons = [
   { value: '2024', label: '2024-2025' },
   { value: '2023', label: '2023-2024' },
   { value: '2022', label: '2022-2023' },
+  { value: '2021', label: '2021-2022' },
+  { value: '2020', label: '2020-2021' },
+  { value: '2019', label: '2019-2020' },
+  { value: '2018', label: '2018-2019' },
+  { value: '2017', label: '2017-2018' },
+  { value: '2016', label: '2016-2017' },
 ];
 
 interface AZFixturesProps {
@@ -126,6 +132,21 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
     }
   };
 
+  const normalizeVenueName = (venueName: string | undefined, homeTeamName: string, awayTeamName: string) => {
+    if (!venueName) {
+      // Fallback to team-based stadium names when venue is missing
+      if (homeTeamName.toLowerCase().includes('az')) return 'AFAS Stadion';
+      if (homeTeamName.toLowerCase().includes('nac')) return 'Rat Verlegh Stadion';
+      if (homeTeamName.toLowerCase().includes('telstar')) return 'BUKO Stadion';
+      return 'Onbekend stadion';
+    }
+
+    // Fix known venue name issues
+    if (venueName.toLowerCase() === 'afas stadio') return 'AFAS Stadion';
+    
+    return venueName;
+  };
+
   const isCurrentSeason = selectedSeason === currentSeason;
   const isLoading = isCurrentSeason ? (upcomingLoading || historicalLoading) : historicalLoading;
   const error = upcomingError || historicalError;
@@ -229,6 +250,7 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
                   getCompetitionName={getCompetitionName}
                   getCompetitionBadgeVariant={getCompetitionBadgeVariant}
                   translateRound={translateRound}
+                  normalizeVenueName={normalizeVenueName}
                 />
               ))}
             </div>
@@ -250,6 +272,7 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
                   getCompetitionName={getCompetitionName}
                   getCompetitionBadgeVariant={getCompetitionBadgeVariant}
                   translateRound={translateRound}
+                  normalizeVenueName={normalizeVenueName}
                 />
               ))}
             </div>
