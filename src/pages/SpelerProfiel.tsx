@@ -349,7 +349,7 @@ const SpelerProfiel = () => {
         {careerTotals && (
           <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-az-black dark:text-white">Career Totalen</CardTitle>
+              <CardTitle className="text-az-black dark:text-white">Carrière</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">

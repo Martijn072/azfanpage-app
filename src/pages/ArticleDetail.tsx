@@ -12,6 +12,7 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useOfflineDetection } from "@/hooks/useOfflineDetection";
 import { articleCache } from "@/services/articleCache";
+import { useCurrentPlayers, addPlayerLinksToContent } from "@/hooks/usePlayerLinking";
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,7 @@ const ArticleDetail = () => {
   const [cachedArticle, setCachedArticle] = useState(null);
   
   const { isSyncing, handleManualSync, isOnline } = useOfflineSync();
+  const { data: players } = useCurrentPlayers();
   
   // Check for cached version
   useEffect(() => {
@@ -67,6 +69,11 @@ const ArticleDetail = () => {
   // Use cached content if offline and no online data
   const displayArticle = article || (cachedArticle && !isOnline ? cachedArticle : null);
   const isShowingCachedContent = !article && cachedArticle && !isOnline;
+
+  // Process article content to add player links
+  const processedContent = displayArticle?.content 
+    ? addPlayerLinksToContent(displayArticle.content, players || [])
+    : displayArticle?.excerpt || '';
 
   // Show loading state when we're loading and don't have cached content
   if (isLoading && !cachedArticle) {
@@ -245,7 +252,7 @@ const ArticleDetail = () => {
           }}
         >
           <div 
-            dangerouslySetInnerHTML={{ __html: displayArticle.content || displayArticle.excerpt }}
+            dangerouslySetInnerHTML={{ __html: processedContent }}
           />
         </div>
 
