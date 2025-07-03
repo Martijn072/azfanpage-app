@@ -1,63 +1,22 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { callFootballApi } from '@/utils/footballApiClient';
+import { FootballApiResponse, Fixture } from '@/types/footballApi';
+import { FixtureCard } from './FixtureCard';
 
-interface Fixture {
-  fixture: {
-    id: number;
-    date: string;
-    status: {
-      long: string;
-      short: string;
-    };
-    venue: {
-      name: string;
-      city: string;
-    };
-  };
-  league: {
-    id: number;
-    name: string;
-    round: string;
-  };
-  teams: {
-    home: {
-      id: number;
-      name: string;
-      logo: string;
-    };
-    away: {
-      id: number;
-      name: string;
-      logo: string;
-    };
-  };
-  goals: {
-    home: number | null;
-    away: number | null;
-  };
-}
-
-interface FootballApiResponse<T> {
-  response: T[];
-}
-
-const callFootballApi = async (endpoint: string, params: Record<string, string> = {}) => {
-  const { data, error } = await supabase.functions.invoke('football-api', {
-    body: { endpoint, params }
-  });
-
-  if (error) throw error;
-  if (!data || data.error) throw new Error(data?.error || 'API call failed');
-  
-  return data;
-};
+const currentSeason = '2024';
+const seasons = [
+  { value: '2024', label: '2024-2025' },
+  { value: '2023', label: '2023-2024' },
+  { value: '2022', label: '2022-2023' },
+];
 
 interface AZFixturesProps {
   teamId: number | null;
@@ -66,33 +25,70 @@ interface AZFixturesProps {
 
 export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
   const [filter, setFilter] = useState<string>('all');
+  const [selectedSeason, setSelectedSeason] = useState<string>(currentSeason);
   const navigate = useNavigate();
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['az-all-fixtures', teamId, filter],
+  // Fetch upcoming fixtures for current season
+  const { data: upcomingFixtures, isLoading: upcomingLoading, error: upcomingError } = useQuery({
+    queryKey: ['az-upcoming-fixtures', teamId, filter],
     queryFn: async () => {
-      if (!teamId) return [];
+      if (!teamId || selectedSeason !== currentSeason) return [];
       
-      console.log('🏆 Fetching all AZ fixtures for season 2024...');
+      console.log('🔮 Fetching upcoming AZ fixtures...');
       const params: Record<string, string> = {
         team: teamId.toString(),
-        season: '2024'
+        next: '20', // Get next 20 fixtures
+        timezone: 'Europe/Amsterdam'
       };
 
       // Add league filter if not 'all'
       if (filter === 'eredivisie') {
         params.league = '88'; // Eredivisie
+      } else if (filter === 'knvb') {
+        params.league = '94'; // KNVB Beker
       } else if (filter === 'europa') {
         params.league = '848'; // Conference League
       }
 
       const response: FootballApiResponse<Fixture> = await callFootballApi('/fixtures', params);
       
-      console.log('📊 AZ Fixtures Response:', response);
+      console.log('📊 Upcoming Fixtures Response:', response);
+      return response.response || [];
+    },
+    enabled: !!teamId && selectedSeason === currentSeason,
+    staleTime: 1000 * 60 * 15,
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+
+  // Fetch historical fixtures for any season
+  const { data: historicalFixtures, isLoading: historicalLoading, error: historicalError } = useQuery({
+    queryKey: ['az-historical-fixtures', teamId, filter, selectedSeason],
+    queryFn: async () => {
+      if (!teamId) return [];
+      
+      console.log(`🏆 Fetching AZ fixtures for season ${selectedSeason}...`);
+      const params: Record<string, string> = {
+        team: teamId.toString(),
+        season: selectedSeason
+      };
+
+      // Add league filter if not 'all'
+      if (filter === 'eredivisie') {
+        params.league = '88'; // Eredivisie
+      } else if (filter === 'knvb') {
+        params.league = '94'; // KNVB Beker
+      } else if (filter === 'europa') {
+        params.league = '848'; // Conference League
+      }
+
+      const response: FootballApiResponse<Fixture> = await callFootballApi('/fixtures', params);
+      
+      console.log('📊 Historical Fixtures Response:', response);
       return response.response || [];
     },
     enabled: !!teamId,
-    staleTime: 1000 * 60 * 15, // Cache for 15 minutes
+    staleTime: 1000 * 60 * 15,
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
@@ -143,10 +139,22 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
     switch (leagueId) {
       case 88: return 'default'; // Eredivisie - primary red
       case 848: return 'secondary'; // Conference League
-      case 94: return 'outline'; // KNVB Beker
+      case 94: return 'destructive'; // KNVB Beker - orange theme
       default: return 'outline';
     }
   };
+
+  const isCurrentSeason = selectedSeason === currentSeason;
+  const isLoading = isCurrentSeason ? (upcomingLoading || historicalLoading) : historicalLoading;
+  const error = upcomingError || historicalError;
+
+  // Separate upcoming and played fixtures for current season
+  const upcoming = upcomingFixtures || [];
+  const played = historicalFixtures?.filter(fixture => 
+    fixture.goals.home !== null && fixture.goals.away !== null
+  ) || [];
+  const sortedUpcoming = upcoming.sort((a, b) => new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime());
+  const sortedPlayed = played.sort((a, b) => new Date(b.fixture.date).getTime() - new Date(a.fixture.date).getTime());
 
   const handleFixtureClick = (fixtureId: number) => {
     navigate(`/wedstrijd/${fixtureId}`);
@@ -163,12 +171,12 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
             <p className="text-premium-gray-600 dark:text-gray-300 mb-4">
               Fout bij het laden van het wedstrijdprogramma
             </p>
-            <button 
-              onClick={() => refetch()}
-              className="btn-primary"
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-az-red hover:bg-az-red/90 text-white"
             >
               Opnieuw proberen
-            </button>
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -192,25 +200,29 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
     );
   }
 
-  const fixtures = data || [];
-  const sortedFixtures = fixtures.sort((a, b) => new Date(b.fixture.date).getTime() - new Date(a.fixture.date).getTime());
 
   return (
     <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700 shadow-sm">
       <CardHeader className="bg-white dark:bg-gray-800">
         <div className="flex flex-col space-y-4">
-          <CardTitle className="text-az-black dark:text-white">AZ Wedstrijdprogramma Seizoen 2024-2025</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-az-black dark:text-white">AZ Wedstrijdprogramma</CardTitle>
+            <Select value={selectedSeason} onValueChange={setSelectedSeason}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {seasons.map((season) => (
+                  <SelectItem key={season.value} value={season.value}>
+                    {season.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           
-          {/* Filter buttons */}
+          {/* Filter buttons - reordered as requested */}
           <div className="flex gap-2 flex-wrap">
-            <Button
-              variant={filter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('all')}
-              className={filter === 'all' ? 'bg-az-red hover:bg-az-red/90 text-white border-az-red' : 'bg-white dark:bg-gray-800 border-premium-gray-300 hover:bg-premium-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 text-premium-gray-600 dark:text-gray-300'}
-            >
-              Alles
-            </Button>
             <Button
               variant={filter === 'eredivisie' ? 'default' : 'outline'}
               size="sm"
@@ -220,6 +232,14 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
               Eredivisie
             </Button>
             <Button
+              variant={filter === 'knvb' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilter('knvb')}
+              className={filter === 'knvb' ? 'bg-az-red hover:bg-az-red/90 text-white border-az-red' : 'bg-white dark:bg-gray-800 border-premium-gray-300 hover:bg-premium-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 text-premium-gray-600 dark:text-gray-300'}
+            >
+              KNVB Beker
+            </Button>
+            <Button
               variant={filter === 'europa' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setFilter('europa')}
@@ -227,100 +247,73 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
             >
               Europa
             </Button>
+            <Button
+              variant={filter === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilter('all')}
+              className={filter === 'all' ? 'bg-az-red hover:bg-az-red/90 text-white border-az-red' : 'bg-white dark:bg-gray-800 border-premium-gray-300 hover:bg-premium-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 text-premium-gray-600 dark:text-gray-300'}
+            >
+              Alles
+            </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent className="bg-white dark:bg-gray-800">
-        {fixtures.length === 0 ? (
+        {isCurrentSeason && sortedUpcoming.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-az-black dark:text-white mb-4">
+              Aankomende wedstrijden
+            </h3>
+            <div className="space-y-4">
+              {sortedUpcoming.map((fixture) => (
+                <FixtureCard 
+                  key={`upcoming-${fixture.fixture.id}`} 
+                  fixture={fixture} 
+                  onFixtureClick={handleFixtureClick}
+                  formatDate={formatDate}
+                  getCompetitionName={getCompetitionName}
+                  getCompetitionBadgeVariant={getCompetitionBadgeVariant}
+                  translateRound={translateRound}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {sortedPlayed.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-az-black dark:text-white mb-4">
+              {isCurrentSeason ? 'Gespeelde wedstrijden' : `Uitslagen seizoen ${seasons.find(s => s.value === selectedSeason)?.label}`}
+            </h3>
+            <div className="space-y-4">
+              {sortedPlayed.map((fixture) => (
+                <FixtureCard 
+                  key={`played-${fixture.fixture.id}`} 
+                  fixture={fixture} 
+                  onFixtureClick={handleFixtureClick}
+                  formatDate={formatDate}
+                  getCompetitionName={getCompetitionName}
+                  getCompetitionBadgeVariant={getCompetitionBadgeVariant}
+                  translateRound={translateRound}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!isCurrentSeason && sortedPlayed.length === 0 && !isLoading && (
+          <div className="text-center py-8">
+            <p className="text-premium-gray-600 dark:text-gray-300">
+              Geen wedstrijden gevonden voor dit seizoen
+            </p>
+          </div>
+        )}
+
+        {isCurrentSeason && sortedUpcoming.length === 0 && sortedPlayed.length === 0 && !isLoading && (
           <div className="text-center py-8">
             <p className="text-premium-gray-600 dark:text-gray-300">
               Geen wedstrijden gevonden
             </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {sortedFixtures.map((fixture) => (
-              <div 
-                key={fixture.fixture.id}
-                onClick={() => handleFixtureClick(fixture.fixture.id)}
-                className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-600 rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-all cursor-pointer hover:bg-premium-gray-50 dark:hover:bg-gray-700"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 text-xs sm:text-sm text-premium-gray-600 dark:text-gray-300">
-                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="font-medium">{formatDate(fixture.fixture.date)}</span>
-                  </div>
-                  <Badge 
-                    variant={getCompetitionBadgeVariant(fixture.league.id)}
-                    className={`text-xs font-semibold ${
-                      fixture.league.id === 88 
-                        ? 'bg-az-red text-white hover:bg-az-red/90 border-az-red' 
-                        : fixture.league.id === 848
-                        ? 'bg-blue-600 text-white hover:bg-blue-700 border-blue-600'
-                        : 'border-premium-gray-300 text-premium-gray-700 dark:border-gray-600 dark:text-gray-300'
-                    }`}
-                  >
-                    {getCompetitionName(fixture.league.id, fixture.league.name)}
-                  </Badge>
-                </div>
-
-                {/* Mobile-first layout: centered logos with score */}
-                <div className="flex items-center justify-center gap-4 sm:gap-8">
-                  {/* Home team */}
-                  <div className="flex flex-col items-center gap-2">
-                    <img 
-                      src={fixture.teams.home.logo} 
-                      alt={fixture.teams.home.name}
-                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
-                    />
-                    {/* Show team name only on larger screens */}
-                    <span className="hidden sm:block font-semibold text-az-black dark:text-white text-center text-sm">
-                      {fixture.teams.home.name}
-                    </span>
-                  </div>
-
-                  {/* Score or VS */}
-                  <div className="flex flex-col items-center justify-center">
-                    {fixture.goals.home !== null && fixture.goals.away !== null ? (
-                      <div className="text-2xl sm:text-3xl font-bold text-az-red">
-                        {fixture.goals.home} - {fixture.goals.away}
-                      </div>
-                    ) : (
-                      <div className="text-premium-gray-400 dark:text-gray-500 font-medium text-lg">
-                        vs
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Away team */}
-                  <div className="flex flex-col items-center gap-2">
-                    <img 
-                      src={fixture.teams.away.logo} 
-                      alt={fixture.teams.away.name}
-                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
-                    />
-                    {/* Show team name only on larger screens */}
-                    <span className="hidden sm:block font-semibold text-az-black dark:text-white text-center text-sm">
-                      {fixture.teams.away.name}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Venue and Round info */}
-                <div className="flex items-center justify-between mt-3 text-xs sm:text-sm">
-                  <div className="flex items-center gap-1 text-premium-gray-600 dark:text-gray-300">
-                    <MapPin className="w-3 h-3" />
-                    <span className="truncate">{fixture.fixture.venue.name}</span>
-                  </div>
-                  <Badge 
-                    variant="outline" 
-                    className="text-xs bg-premium-gray-50 dark:bg-gray-700 border-premium-gray-200 dark:border-gray-600 text-premium-gray-700 dark:text-gray-300"
-                  >
-                    {translateRound(fixture.league.round)}
-                  </Badge>
-                </div>
-              </div>
-            ))}
           </div>
         )}
       </CardContent>

@@ -33,6 +33,10 @@ export interface Fixture {
       short: string;
       elapsed: number;
     };
+    venue?: {
+      name: string;
+      city: string;
+    };
   };
   league: {
     id: number;
