@@ -43,10 +43,9 @@ export const useCurrentPlayers = () => {
     queryFn: async () => {
       console.log('🔍 Fetching current AZ players...');
       
-      // Get current AZ team ID first
+      // Get current AZ team ID first - remove country parameter that conflicts with search
       const teamsResponse: FootballApiResponse<{ team: { id: number; name: string } }> = await callFootballApi('/teams', {
-        search: 'AZ Alkmaar',
-        country: 'Netherlands'
+        search: 'AZ Alkmaar'
       });
 
       console.log('🏟️ Teams response:', teamsResponse);
