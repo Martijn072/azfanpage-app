@@ -192,8 +192,8 @@
   .article-content .wp-block-gallery img,
   .article-content .gallery img {
     margin: 0;
-    aspect-ratio: 1;
-    object-fit: cover;
+    width: 100%;
+    height: auto;
   }
 
   /* Mobile specific improvements */
