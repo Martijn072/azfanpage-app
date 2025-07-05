@@ -19,7 +19,7 @@ export default {
 		},
 		extend: {
 			colors: {
-				// AZ Brand Colors
+				// AZ Brand Colors - FORCE THESE EVERYWHERE
 				'az-red': '#DB0021',
 				'az-white': '#FFFFFF',
 				'az-black': '#1A171B',
@@ -38,11 +38,12 @@ export default {
 					900: '#171717',
 				},
 				
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
+				// FORCE ALL SYSTEM COLORS TO USE AZ RED - NO CSS VARIABLES
+				border: '#E5E5E5',
+				input: '#E5E5E5',
+				ring: '#DB0021',
+				background: '#FFFFFF',
+				foreground: '#1A171B',
 				primary: {
 					DEFAULT: '#DB0021',
 					foreground: '#FFFFFF'

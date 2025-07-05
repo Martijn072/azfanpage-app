@@ -2,6 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== ULTIMATE YELLOW ELIMINATION - FORCE AZ RED EVERYWHERE ===== */
+/* This section forces ALL primary colors to AZ Red (#DB0021) with maximum CSS specificity */
+
+/* Force all primary-related colors to AZ Red */
+:root {
+  --color-primary: #DB0021 !important;
+  --primary-color: #DB0021 !important;
+  --accent-color: #DB0021 !important;
+}
+
+/* Override ALL possible Radix UI states that could show yellow */
+[data-state="checked"],
+[data-state="on"],
+[data-checked="true"],
+[data-state="active"] {
+  background-color: #DB0021 !important;
+  border-color: #DB0021 !important;
+}
+
+/* Force all focus rings and outlines to AZ Red */
+*:focus,
+*:focus-visible,
+*:focus-within {
+  outline-color: #DB0021 !important;
+  ring-color: #DB0021 !important;
+  box-shadow: 0 0 0 2px #DB0021 !important;
+}
+
+/* Override ALL Tailwind primary utilities */
+.bg-primary,
+.border-primary,
+.text-primary,
+.ring-primary,
+.outline-primary {
+  background-color: #DB0021 !important;
+  border-color: #DB0021 !important;
+  color: #DB0021 !important;
+  ring-color: #DB0021 !important;
+  outline-color: #DB0021 !important;
+}
+
+/* Force all interactive elements */
+button[data-state="checked"],
+input[type="checkbox"]:checked,
+input[type="radio"]:checked,
+[role="switch"][data-state="checked"],
+[role="tab"][data-state="active"],
+[role="button"][data-state="on"] {
+  background-color: #DB0021 !important;
+  border-color: #DB0021 !important;
+}
+
+/* Eliminate any possible yellow from CSS variables */
+* {
+  --tw-ring-color: #DB0021 !important;
+  --tw-border-color: #DB0021 !important;
+}
+
+/* Target specific Radix components that might show yellow */
+[data-radix-collection-item][data-highlighted],
+[data-radix-select-item][data-highlighted],
+[data-radix-dropdown-menu-item][data-highlighted],
+[data-radix-menubar-item][data-highlighted] {
+  background-color: rgba(219, 0, 33, 0.1) !important;
+  color: #DB0021 !important;
+}
+
 /* Definition of the premium design system with improved Dutch readability */
 
 @layer base {
@@ -414,5 +481,100 @@
 
   .dark .accessibility-settings-v2 [data-radix-select-item][data-highlighted] {
     background-color: #403d41 !important;
+  }
+
+  /* ===== ULTIMATE UI COMPONENT OVERRIDES - ELIMINATE ALL YELLOW ===== */
+  
+  /* All Checkboxes */
+  [data-radix-checkbox-root][data-state="checked"],
+  input[type="checkbox"]:checked,
+  .peer:checked ~ * {
+    background-color: #DB0021 !important;
+    border-color: #DB0021 !important;
+  }
+
+  /* All Switches */
+  [data-radix-switch-root][data-state="checked"],
+  [role="switch"][data-state="checked"] {
+    background-color: #DB0021 !important;
+  }
+
+  /* All Radio Buttons */
+  [data-radix-radio-item][data-state="checked"],
+  input[type="radio"]:checked {
+    background-color: #DB0021 !important;
+    border-color: #DB0021 !important;
+  }
+
+  /* All Progress Bars */
+  [data-radix-progress-indicator],
+  .progress-indicator {
+    background-color: #DB0021 !important;
+  }
+
+  /* All Sliders */
+  [data-radix-slider-range],
+  [data-radix-slider-thumb] {
+    background-color: #DB0021 !important;
+    border-color: #DB0021 !important;
+  }
+
+  /* All Tabs */
+  [data-radix-tabs-trigger][data-state="active"],
+  [role="tab"][data-state="active"] {
+    background-color: rgba(219, 0, 33, 0.1) !important;
+    border-color: #DB0021 !important;
+    color: #DB0021 !important;
+  }
+
+  /* All Accordion triggers */
+  [data-radix-accordion-trigger][data-state="open"] {
+    color: #DB0021 !important;
+  }
+
+  /* All Calendar selections */
+  [data-radix-calendar-day][data-selected="true"],
+  [data-selected="true"] {
+    background-color: #DB0021 !important;
+    color: white !important;
+  }
+
+  /* All Dropdown Menu highlights */
+  [data-radix-dropdown-menu-item][data-highlighted],
+  [data-highlighted="true"] {
+    background-color: rgba(219, 0, 33, 0.1) !important;
+    color: #DB0021 !important;
+  }
+
+  /* All Alert Dialog actions */
+  .destructive,
+  [data-destructive="true"] {
+    background-color: #DB0021 !important;
+    color: white !important;
+  }
+
+  /* Force all button variants */
+  .btn-primary,
+  button[data-primary="true"],
+  [data-variant="default"] {
+    background-color: #DB0021 !important;
+    color: white !important;
+  }
+
+  /* Browser cache busting - timestamped selectors */
+  .force-az-red-v2025-01-05 {
+    background-color: #DB0021 !important;
+    border-color: #DB0021 !important;
+    color: #DB0021 !important;
+  }
+
+  /* Final catch-all for any remaining yellow */
+  *[style*="yellow"],
+  *[class*="yellow"],
+  *[style*="#FFFF00"],
+  *[style*="#FFD700"] {
+    background-color: #DB0021 !important;
+    border-color: #DB0021 !important;
+    color: #DB0021 !important;
   }
 }

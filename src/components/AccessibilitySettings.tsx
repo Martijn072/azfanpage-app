@@ -62,7 +62,7 @@ export const AccessibilitySettings = () => {
           <Accessibility className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
         </button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-80 accessibility-settings-v2">
+      <SheetContent side="right" className="w-80 accessibility-settings-v2 force-az-red-v2025-01-05">
         <SheetHeader>
           <SheetTitle className="text-az-black dark:text-white flex items-center gap-2">
             <Accessibility className="w-5 h-5" />
