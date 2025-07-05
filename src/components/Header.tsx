@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { HeaderMenu } from "./HeaderMenu";
 import { SearchOverlay } from "./SearchOverlay";
-import { AccessibilitySettings } from "./AccessibilitySettings";
 import { useNotifications } from "@/hooks/useNotifications";
 
 export const Header = () => {
@@ -74,7 +73,6 @@ export const Header = () => {
                   <Moon className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
                 )}
               </button>
-              <AccessibilitySettings />
               <HeaderMenu />
             </div>
           </div>
