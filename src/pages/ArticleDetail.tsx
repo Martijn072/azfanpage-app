@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, Wifi } from "lucide-react";
 import { useArticleDetail } from "@/hooks/useArticleDetail";
@@ -11,12 +11,9 @@ import { ShareBar } from "@/components/ShareBar";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { TTSButton } from "@/components/TTSButton";
 import { AudioPlayer } from "@/components/AudioPlayer";
-import { TweetCard } from "@/components/TweetCard";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useOfflineDetection } from "@/hooks/useOfflineDetection";
 import { articleCache } from "@/services/articleCache";
-import { processTwitterContent, scanForTwitterContent } from "@/utils/tweetDetector";
-import { TweetData } from "@/utils/tweetParser";
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +22,6 @@ const ArticleDetail = () => {
   const [activeTab, setActiveTab] = useState("news");
   const [cachedArticle, setCachedArticle] = useState(null);
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
-  const [tweetData, setTweetData] = useState<TweetData[]>([]);
   
   const { isSyncing, handleManualSync, isOnline } = useOfflineSync();
   
@@ -235,35 +231,10 @@ const ArticleDetail = () => {
   const displayArticle = article || (cachedArticle && !isOnline ? cachedArticle : null);
   const isShowingCachedContent = !article && cachedArticle && !isOnline;
 
-  // Process Twitter content and set tweet data
-  useEffect(() => {
-    if (displayArticle?.content) {
-      console.log('🔍 Processing Twitter content for article...');
-      const twitterProcessed = processTwitterContent(displayArticle.content);
-      setTweetData(twitterProcessed.tweets);
-    } else {
-      setTweetData([]);
-    }
-  }, [displayArticle?.content]);
-
-  // Memoized processed content for performance
-  const processedContent = useMemo(() => {
-    if (!displayArticle?.content) return displayArticle?.excerpt || '';
-    
-    console.log('🔄 Processing article content...');
-    
-    // Process Twitter content but don't set state here
-    const twitterProcessed = scanForTwitterContent(displayArticle.content);
-    
-    // Apply content processing pipeline
-    return convertInternalLinks(
-      cleanImageAttributes(
-        cleanImageUrls(
-          cleanWordPressContainers(twitterProcessed.processedContent)
-        )
-      )
-    );
-  }, [displayArticle?.content]);
+  // Process article content to clean images and convert internal links
+  const processedContent = displayArticle?.content 
+    ? convertInternalLinks(cleanImageAttributes(cleanImageUrls(cleanWordPressContainers(displayArticle.content))))
+    : displayArticle?.excerpt || '';
 
   // DOM cleanup for any remaining image attributes after rendering
   useEffect(() => {
@@ -301,16 +272,16 @@ const ArticleDetail = () => {
     return () => clearTimeout(timeoutId);
   }, [displayArticle, processedContent]);
 
-  // Setup click handlers for internal links and render tweet cards after content is rendered
+  // Setup click handlers for internal links after content is rendered
   useEffect(() => {
     if (!displayArticle) return;
 
-    const setupInteractiveContent = () => {
+    const setupInternalLinks = () => {
       const articleContent = document.querySelector('.article-content');
       if (!articleContent) return;
 
-      // Setup internal links
       const internalLinks = articleContent.querySelectorAll('a[data-internal-link]');
+      
       console.log(`🔧 Setting up ${internalLinks.length} internal links`);
       
       internalLinks.forEach((link) => {
@@ -331,35 +302,10 @@ const ArticleDetail = () => {
         // Add new listener
         link.addEventListener('click', handleClick);
       });
-
-      // Setup tweet card replacements
-      const tweetPlaceholders = articleContent.querySelectorAll('div[data-tweet-replacement]');
-      console.log(`🐦 Found ${tweetPlaceholders.length} tweet placeholders to replace`);
-      
-      tweetPlaceholders.forEach((placeholder) => {
-        const tweetId = placeholder.getAttribute('data-tweet-replacement');
-        const tweetUrl = placeholder.getAttribute('data-tweet-url');
-        
-        if (tweetId && tweetUrl) {
-          const tweet = tweetData.find(t => t.id === tweetId);
-          if (tweet && placeholder.parentNode) {
-            // Create tweet card container
-            const tweetContainer = document.createElement('div');
-            tweetContainer.className = 'tweet-card-container';
-            
-            // Replace placeholder with tweet container
-            placeholder.parentNode.replaceChild(tweetContainer, placeholder);
-            
-            // Note: The actual TweetCard component will be rendered by React
-            // This is just setting up the DOM structure
-            console.log(`✅ Prepared tweet card for @${tweet.username}`);
-          }
-        }
-      });
     };
 
     // Run setup after a small delay to ensure DOM is updated
-    const timeoutId = setTimeout(setupInteractiveContent, 100);
+    const timeoutId = setTimeout(setupInternalLinks, 100);
     
     return () => {
       clearTimeout(timeoutId);
@@ -374,7 +320,7 @@ const ArticleDetail = () => {
         });
       }
     };
-  }, [displayArticle, processedContent, navigate, tweetData]);
+  }, [displayArticle, processedContent, navigate]);
 
   // Handle clicks on internal links (fallback)
   const handleContentClick = (e: React.MouseEvent) => {
@@ -582,7 +528,7 @@ const ArticleDetail = () => {
           </div>
         )}
 
-        {/* Article content with enhanced styling, debug info, and embedded tweets */}
+        {/* Article content with enhanced styling and debug info */}
         <div 
           className={`article-content ${typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? 'prose-invert' : ''}`}
           onLoad={() => {
@@ -605,15 +551,6 @@ const ArticleDetail = () => {
             onClick={handleContentClick}
             dangerouslySetInnerHTML={{ __html: processedContent }}
           />
-          
-          {/* Render tweet cards for any found tweets */}
-          {tweetData.length > 0 && (
-            <div className="tweet-cards-section">
-              {tweetData.map((tweet, index) => (
-                <TweetCard key={`${tweet.id}-${index}`} tweet={tweet} />
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Comments only show for online content */}
