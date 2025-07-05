@@ -38,15 +38,14 @@ export default {
 					900: '#171717',
 				},
 				
-				// System colors using CSS variables for theming
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#DB0021',
+					foreground: '#FFFFFF'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',

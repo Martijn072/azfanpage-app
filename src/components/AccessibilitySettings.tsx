@@ -62,7 +62,7 @@ export const AccessibilitySettings = () => {
           <Accessibility className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
         </button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-80 accessibility-settings-v2 force-az-red-v2025-01-05">
+      <SheetContent side="right" className="w-80">
         <SheetHeader>
           <SheetTitle className="text-az-black dark:text-white flex items-center gap-2">
             <Accessibility className="w-5 h-5" />
@@ -80,14 +80,7 @@ export const AccessibilitySettings = () => {
               Tekstgrootte
             </Label>
             <Select value={textSize} onValueChange={applyTextSize}>
-              <SelectTrigger 
-                id="text-size" 
-                aria-label="Selecteer tekstgrootte" 
-                className="focus:ring-az-red"
-                style={{
-                  '--tw-ring-color': '#DB0021'
-                } as any}
-              >
+              <SelectTrigger id="text-size" aria-label="Selecteer tekstgrootte" className="focus:ring-az-red">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -109,10 +102,6 @@ export const AccessibilitySettings = () => {
               onCheckedChange={applyHighContrast}
               aria-describedby="high-contrast-desc"
               className="data-[state=checked]:bg-az-red focus-visible:ring-az-red"
-              style={{ 
-                '--radix-switch-checked-bg': '#DB0021',
-                '--tw-ring-color': '#DB0021'
-              } as any}
             />
           </div>
           <p id="high-contrast-desc" className="text-xs text-premium-gray-500 dark:text-gray-400">
@@ -130,10 +119,6 @@ export const AccessibilitySettings = () => {
               onCheckedChange={applyReduceMotion}
               aria-describedby="reduce-motion-desc"
               className="data-[state=checked]:bg-az-red focus-visible:ring-az-red"
-              style={{ 
-                '--radix-switch-checked-bg': '#DB0021',
-                '--tw-ring-color': '#DB0021'
-              } as any}
             />
           </div>
           <p id="reduce-motion-desc" className="text-xs text-premium-gray-500 dark:text-gray-400">
@@ -151,10 +136,6 @@ export const AccessibilitySettings = () => {
               onCheckedChange={applyScreenReaderMode}
               aria-describedby="screen-reader-desc"
               className="data-[state=checked]:bg-az-red focus-visible:ring-az-red"
-              style={{ 
-                '--radix-switch-checked-bg': '#DB0021',
-                '--tw-ring-color': '#DB0021'
-              } as any}
             />
           </div>
           <p id="screen-reader-desc" className="text-xs text-premium-gray-500 dark:text-gray-400">
