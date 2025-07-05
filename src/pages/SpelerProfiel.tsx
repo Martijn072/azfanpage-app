@@ -209,6 +209,37 @@ const SpelerProfiel = () => {
     };
   };
 
+  // Get all career seasons (all teams)
+  const getAllCareerSeasons = () => {
+    if (!playerData || playerData.length === 0) return [];
+    
+    const allSeasons: Array<{
+      season: number;
+      team: { id: number; name: string; logo: string };
+      league: { name: string; logo: string };
+      stats: any;
+      isAZ: boolean;
+    }> = [];
+    
+    playerData.forEach(seasonData => {
+      seasonData.statistics.forEach(stat => {
+        // Only include seasons with actual game appearances
+        if (stat.games?.appearences && stat.games.appearences > 0) {
+          allSeasons.push({
+            season: stat.league.season,
+            team: stat.team,
+            league: stat.league,
+            stats: stat,
+            isAZ: stat.team.id === azTeamId
+          });
+        }
+      });
+    });
+    
+    // Sort by season (newest first)
+    return allSeasons.sort((a, b) => b.season - a.season);
+  };
+
   const playerInfo = playerData?.[0]?.player;
   const azCareerTotals = getAZCareerTotals();
 
@@ -404,6 +435,7 @@ const SpelerProfiel = () => {
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-b border-gray-200 dark:border-gray-700">
                       <TableHead className="text-az-black dark:text-white font-semibold">Seizoen</TableHead>
+                      <TableHead className="text-center text-az-black dark:text-white font-semibold">Team</TableHead>
                       <TableHead className="text-center text-az-black dark:text-white font-semibold">Competitie</TableHead>
                       <TableHead className="text-center text-az-black dark:text-white font-semibold">Wedst</TableHead>
                       <TableHead className="text-center text-az-black dark:text-white font-semibold">Min</TableHead>
@@ -415,46 +447,61 @@ const SpelerProfiel = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {playerData.map((seasonData, index) => {
-                      // Only show AZ statistics
-                      const azStats = seasonData.statistics.find(stat => stat.team.id === azTeamId);
-                      if (!azStats || !azStats.games?.appearences) return null;
+                    {getAllCareerSeasons().map((seasonInfo, index) => {
+                      const stats = seasonInfo.stats;
                       
                       return (
-                        <TableRow key={`${azStats.league.season}-${index}`} className="hover:bg-premium-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700">
+                        <TableRow 
+                          key={`${seasonInfo.season}-${seasonInfo.team.id}-${index}`} 
+                          className={`hover:bg-premium-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 ${
+                            seasonInfo.isAZ ? 'bg-az-red/5 dark:bg-az-red/10' : ''
+                          }`}
+                        >
                           <TableCell className="font-medium text-az-black dark:text-white">
-                            {azStats.league.season}-{(azStats.league.season + 1).toString().slice(-2)}
+                            {seasonInfo.season}-{(seasonInfo.season + 1).toString().slice(-2)}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <img 
+                                src={seasonInfo.team.logo} 
+                                alt={seasonInfo.team.name}
+                                className="w-4 h-4"
+                              />
+                              <span className={`text-xs ${seasonInfo.isAZ ? 'font-semibold text-az-red' : 'text-premium-gray-600 dark:text-gray-300'}`}>
+                                {seasonInfo.team.name}
+                              </span>
+                            </div>
                           </TableCell>
                           <TableCell className="text-center text-premium-gray-600 dark:text-gray-300">
                             <div className="flex items-center justify-center gap-2">
                               <img 
-                                src={azStats.league.logo} 
-                                alt={azStats.league.name}
+                                src={seasonInfo.league.logo} 
+                                alt={seasonInfo.league.name}
                                 className="w-4 h-4"
                               />
-                              <span className="text-xs">{azStats.league.name}</span>
+                              <span className="text-xs">{seasonInfo.league.name}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-center text-premium-gray-600 dark:text-gray-300">
-                            {azStats.games?.appearences || 0}
+                            {stats.games?.appearences || 0}
                           </TableCell>
                           <TableCell className="text-center text-premium-gray-600 dark:text-gray-300">
-                            {azStats.games?.minutes || 0}
+                            {stats.games?.minutes || 0}
                           </TableCell>
                           <TableCell className="text-center font-bold text-green-600">
-                            {azStats.goals?.total || 0}
+                            {stats.goals?.total || 0}
                           </TableCell>
                           <TableCell className="text-center font-bold text-blue-600">
-                            {azStats.goals?.assists || 0}
+                            {stats.goals?.assists || 0}
                           </TableCell>
                           <TableCell className="text-center text-premium-gray-600 dark:text-gray-300">
-                            {azStats.cards?.yellow || 0}
+                            {stats.cards?.yellow || 0}
                           </TableCell>
                           <TableCell className="text-center text-premium-gray-600 dark:text-gray-300">
-                            {azStats.cards?.red || 0}
+                            {stats.cards?.red || 0}
                           </TableCell>
                           <TableCell className="text-center text-premium-gray-600 dark:text-gray-300">
-                            {azStats.games?.rating ? parseFloat(azStats.games.rating).toFixed(1) : '-'}
+                            {stats.games?.rating ? parseFloat(stats.games.rating).toFixed(1) : '-'}
                           </TableCell>
                         </TableRow>
                       );
