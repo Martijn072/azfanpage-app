@@ -1,11 +1,8 @@
 import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { PartnerCard } from "@/components/PartnerCard";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Building2, Heart, Star } from "lucide-react";
+import { Building2, Heart } from "lucide-react";
 
 // Partners data
 const partnersData = [
@@ -43,18 +40,6 @@ const partnersData = [
 
 export default function Partners() {
   const [activeTab, setActiveTab] = useState("home");
-  const navigate = useNavigate();
-
-  // Sort partners by tier (premium first) and then by name
-  const sortedPartners = [...partnersData].sort((a, b) => {
-    if (a.tier === "premium" && b.tier !== "premium") return -1;
-    if (b.tier === "premium" && a.tier !== "premium") return 1;
-    return a.name.localeCompare(b.name);
-  });
-
-  const handlePartnerClick = (partnerId: string) => {
-    navigate(`/partner/${partnerId}`);
-  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -91,54 +76,9 @@ export default function Partners() {
         </div>
 
         {/* Partners Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sortedPartners.map((partner) => (
-            <Card key={partner.id} className="group hover:shadow-lg transition-all duration-300 
-                                               hover:scale-105 cursor-pointer border-border bg-card">
-              <CardHeader className="text-center pb-4">
-                {partner.tier === "premium" && (
-                  <div className="flex justify-center mb-2">
-                    <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white 
-                                   border-0 text-xs font-medium">
-                      <Star className="w-3 h-3 mr-1" />
-                      Premium Partner
-                    </Badge>
-                  </div>
-                )}
-                
-                <div className="w-16 h-16 mx-auto mb-3 bg-muted rounded-lg flex items-center justify-center">
-                  <Building2 className="w-8 h-8 text-muted-foreground" />
-                </div>
-                
-                <CardTitle className="text-headline-sm text-card-foreground">
-                  {partner.name}
-                </CardTitle>
-                
-                <Badge variant="outline" className="w-fit mx-auto text-xs">
-                  {partner.category}
-                </Badge>
-              </CardHeader>
-              
-              <CardContent className="pt-0">
-                <CardDescription className="text-center text-body-sm mb-4 text-muted-foreground">
-                  {partner.description}
-                </CardDescription>
-                
-                <div className="text-center mb-4">
-                  <p className="text-xs text-muted-foreground">
-                    AZFanpage partner sinds {partner.since}
-                  </p>
-                </div>
-                
-                <Button 
-                  onClick={() => handlePartnerClick(partner.id)}
-                  className="w-full bg-az-red hover:bg-red-700 text-white"
-                  size="sm"
-                >
-                  Ontdek {partner.name.split(' ')[0]}
-                </Button>
-              </CardContent>
-            </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {partnersData.map((partner) => (
+            <PartnerCard key={partner.id} partner={partner} />
           ))}
         </div>
 
