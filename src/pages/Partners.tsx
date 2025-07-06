@@ -7,61 +7,37 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Heart, Star } from "lucide-react";
 
-// Sample partners data
+// Partners data
 const partnersData = [
   {
-    id: "restaurant-de-kikker",
-    name: "Restaurant De Kikker",
-    description: "Authentiek Noord-Hollands restaurant met passie voor lokale producten",
+    id: "072design",
+    name: "072DESIGN",
+    description: "Webdesign uit Alkmaar. 072DESIGN bouwt slimme websites voor ondernemers die online willen groeien.",
     logo: "/placeholder.svg",
     tier: "premium",
-    since: "2022",
-    category: "Horeca"
+    since: "2024",
+    category: "Webdesign",
+    tagline: "Slimme websites. Lokale kracht."
   },
   {
-    id: "autobedrijf-alkmaar",
-    name: "Autobedrijf van der Berg",
-    description: "Familiebedrijf gespecialiseerd in Volkswagen en Audi",
-    logo: "/placeholder.svg",
-    tier: "standard",
-    since: "2023",
-    category: "Automotive"
-  },
-  {
-    id: "bouwbedrijf-noordholland",
-    name: "Bouwbedrijf Noord-Holland",
-    description: "Duurzaam bouwen voor particulieren en bedrijven",
-    logo: "/placeholder.svg",
-    tier: "premium", 
-    since: "2021",
-    category: "Bouw"
-  },
-  {
-    id: "kapper-alkmaar-centrum",
-    name: "Kapsalon Centrum",
-    description: "Modern haar- en baardverzorging in het hart van Alkmaar",
-    logo: "/placeholder.svg",
-    tier: "standard",
-    since: "2023",
-    category: "Wellness"
-  },
-  {
-    id: "fietsenwinkel-de-wieler",
-    name: "Fietsenwinkel De Wieler",
-    description: "Al 40 jaar specialist in elektrische en sportfietsen",
+    id: "voltvast",
+    name: "VoltVast",
+    description: "Energieopslag voor thuis. VoltVast helpt huishoudens grip te krijgen op hun eigen energie.",
     logo: "/placeholder.svg",
     tier: "premium",
-    since: "2022",
-    category: "Sport & Recreatie"
+    since: "2024",
+    category: "Energie",
+    tagline: "Jouw energie, jouw regels."
   },
   {
-    id: "advocatenkantoor-legal",
-    name: "Advocatenkantoor Legal+",
-    description: "Juridische expertise op het gebied van ondernemingsrecht",
+    id: "dutch-balance",
+    name: "Dutch Balance",
+    description: "Natuurproducten voor balans. Dutch Balance biedt hoogwaardige supplementen voor lichaam en geest.",
     logo: "/placeholder.svg",
-    tier: "standard",
-    since: "2023",
-    category: "Juridisch"
+    tier: "premium",
+    since: "2024",
+    category: "Gezondheid",
+    tagline: "In balans met de natuur."
   }
 ];
 
