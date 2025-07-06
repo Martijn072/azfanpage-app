@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Menu, Home, Bell, Calendar, Table, Users, Trophy } from "lucide-react";
+import { Menu, Home, Calendar, Table, Users, Trophy, Bell, MessageSquare } from "lucide-react";
 
 export const HeaderMenu = () => {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ export const HeaderMenu = () => {
     { id: "home", label: "Home", icon: Home, path: "/" },
     { id: "news", label: "Nieuws", icon: Bell, path: "/nieuws" },
     { id: "programma", label: "Programma", icon: Calendar, path: "/programma" },
+    { id: "forum", label: "Forum", icon: MessageSquare, path: "/forum" },
     { id: "eredivisie", label: "Eredivisie Stand", icon: Table, path: "/eredivisie" },
     { id: "spelers", label: "Speler Statistieken", icon: Users, path: "/spelers" },
     { id: "conference", label: "Conference League", icon: Trophy, path: "/conference-league" },

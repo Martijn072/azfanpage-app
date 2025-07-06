@@ -8,6 +8,7 @@ import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { WordPressComments } from "@/components/WordPressComments";
 import { ShareBar } from "@/components/ShareBar";
+import { ForumDiscussionWidget } from "@/components/ForumDiscussionWidget";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { TTSButton } from "@/components/TTSButton";
 import { AudioPlayer } from "@/components/AudioPlayer";
@@ -552,6 +553,16 @@ const ArticleDetail = () => {
             dangerouslySetInnerHTML={{ __html: processedContent }}
           />
         </div>
+
+        {/* Forum Discussion Widget */}
+        {!isShowingCachedContent && (
+          <div className="my-8">
+            <ForumDiscussionWidget 
+              articleTitle={displayArticle.title}
+              articleId={id!}
+            />
+          </div>
+        )}
 
         {/* Comments only show for online content */}
         {!isShowingCachedContent && (

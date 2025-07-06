@@ -1,5 +1,5 @@
 
-import { Bell, Calendar, House, Table, MoreHorizontal } from "lucide-react";
+import { Bell, Calendar, House, Table, MessageSquare, MoreHorizontal } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MoreSheet } from "./MoreSheet";
 
@@ -16,6 +16,7 @@ export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationPro
     { id: "home", label: "Home", icon: House, path: "/" },
     { id: "news", label: "Nieuws", icon: Bell, path: "/nieuws" },
     { id: "programma", label: "Programma", icon: Calendar, path: "/programma" },
+    { id: "forum", label: "Forum", icon: MessageSquare, path: "/forum" },
     { id: "eredivisie", label: "Stand", icon: Table, path: "/eredivisie" },
   ];
 
@@ -25,6 +26,7 @@ export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationPro
     if (location.pathname === "/nieuws") return "news";
     if (location.pathname === "/eredivisie") return "eredivisie";
     if (location.pathname === "/programma") return "programma";
+    if (location.pathname === "/forum") return "forum";
     if (location.pathname === "/notificaties") return "notifications";
     // For "more" pages, don't highlight any main tab
     if (location.pathname === "/spelers" || location.pathname === "/conference-league") return "meer";
