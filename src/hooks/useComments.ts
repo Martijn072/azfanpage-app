@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -7,9 +6,10 @@ export interface Comment {
   id: string;
   article_id: string;
   user_id: string;
+  wordpress_user_id?: number;
   author_name: string;
   author_email: string | null;
-  author_avatar: string | null;
+  author_avatar_url: string | null;
   content: string;
   parent_id: string | null;
   likes_count: number;
@@ -24,7 +24,12 @@ export interface CommentFormData {
   author_name: string;
   author_email?: string;
   content: string;
-  parent_id?: string;
+  parent_id?: string | null;
+}
+
+export interface WordPressCommentData {
+  wordpress_user_id: number;
+  author_avatar_url?: string;
 }
 
 export const useComments = (articleId: string) => {
@@ -51,9 +56,9 @@ export const useComments = (articleId: string) => {
       // Map the secure_comments data to match our Comment interface
       const mappedComments = data.map(comment => ({
         ...comment,
-        author_name: 'Anonymous User', // Default since secure_comments doesn't have author_name
-        author_email: null,
-        author_avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}`,
+        author_name: comment.author_name || 'Anonymous User',
+        author_email: comment.author_email || null,
+        author_avatar_url: comment.author_avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}`,
       })) as Comment[];
       
       // Organize comments with replies
@@ -73,26 +78,64 @@ export const useAddComment = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ articleId, commentData }: { articleId: string; commentData: CommentFormData }) => {
+    mutationFn: async ({ 
+      articleId, 
+      commentData, 
+      wordpressData 
+    }: { 
+      articleId: string; 
+      commentData: CommentFormData;
+      wordpressData?: WordPressCommentData;
+    }) => {
       console.log('💬 Adding new comment:', commentData);
-      const { data, error } = await supabase
-        .from('secure_comments')
-        .insert({
-          article_id: articleId,
-          content: commentData.content,
-          parent_id: commentData.parent_id || null,
-          user_id: 'anonymous-user', // Since we don't have auth, use placeholder
-        })
-        .select()
-        .single();
+      
+      // For WordPress authenticated users
+      if (wordpressData?.wordpress_user_id) {
+        const { data, error } = await supabase
+          .from('secure_comments')
+          .insert({
+            article_id: articleId,
+            content: commentData.content,
+            author_name: commentData.author_name,
+            author_email: commentData.author_email || null,
+            author_avatar_url: wordpressData.author_avatar_url || null,
+            wordpress_user_id: wordpressData.wordpress_user_id,
+            parent_id: commentData.parent_id || null,
+            user_id: `wp-${wordpressData.wordpress_user_id}`, // Use WordPress ID as user_id
+          })
+          .select()
+          .single();
 
-      if (error) {
-        console.error('❌ Error adding comment:', error);
-        throw error;
+        if (error) {
+          console.error('❌ Error adding comment:', error);
+          throw error;
+        }
+
+        console.log('✅ Comment added:', data);
+        return data;
+      } else {
+        // Fallback for anonymous users (if needed)
+        const { data, error } = await supabase
+          .from('secure_comments')
+          .insert({
+            article_id: articleId,
+            content: commentData.content,
+            author_name: commentData.author_name,
+            author_email: commentData.author_email || null,
+            parent_id: commentData.parent_id || null,
+            user_id: 'anonymous-user',
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('❌ Error adding comment:', error);
+          throw error;
+        }
+
+        console.log('✅ Comment added:', data);
+        return data;
       }
-
-      console.log('✅ Comment added:', data);
-      return data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['comments', variables.articleId] });

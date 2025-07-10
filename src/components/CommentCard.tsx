@@ -43,7 +43,7 @@ export const CommentCard = ({ comment, articleId, depth = 0 }: CommentCardProps)
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
             <img
-              src={comment.author_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_name}`}
+              src={comment.author_avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_name}`}
               alt={comment.author_name}
               className="w-8 h-8 rounded-full"
             />

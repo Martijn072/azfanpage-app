@@ -379,6 +379,9 @@ export type Database = {
       secure_comments: {
         Row: {
           article_id: string
+          author_avatar_url: string | null
+          author_email: string | null
+          author_name: string | null
           content: string
           content_html: string | null
           created_at: string | null
@@ -399,9 +402,13 @@ export type Database = {
           spam_score: number | null
           updated_at: string | null
           user_id: string
+          wordpress_user_id: number | null
         }
         Insert: {
           article_id: string
+          author_avatar_url?: string | null
+          author_email?: string | null
+          author_name?: string | null
           content: string
           content_html?: string | null
           created_at?: string | null
@@ -422,9 +429,13 @@ export type Database = {
           spam_score?: number | null
           updated_at?: string | null
           user_id: string
+          wordpress_user_id?: number | null
         }
         Update: {
           article_id?: string
+          author_avatar_url?: string | null
+          author_email?: string | null
+          author_name?: string | null
           content?: string
           content_html?: string | null
           created_at?: string | null
@@ -445,6 +456,7 @@ export type Database = {
           spam_score?: number | null
           updated_at?: string | null
           user_id?: string
+          wordpress_user_id?: number | null
         }
         Relationships: [
           {
@@ -453,6 +465,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "secure_comments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secure_comments_wordpress_user_id_fkey"
+            columns: ["wordpress_user_id"]
+            isOneToOne: false
+            referencedRelation: "wordpress_users"
+            referencedColumns: ["wordpress_user_id"]
           },
         ]
       }
@@ -576,6 +595,7 @@ export type Database = {
           user_id: string
           username: string
           warning_count: number | null
+          wordpress_user_id: number | null
         }
         Insert: {
           account_created_at?: string | null
@@ -595,6 +615,7 @@ export type Database = {
           user_id: string
           username: string
           warning_count?: number | null
+          wordpress_user_id?: number | null
         }
         Update: {
           account_created_at?: string | null
@@ -614,8 +635,17 @@ export type Database = {
           user_id?: string
           username?: string
           warning_count?: number | null
+          wordpress_user_id?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_wordpress_user_id_fkey"
+            columns: ["wordpress_user_id"]
+            isOneToOne: false
+            referencedRelation: "wordpress_users"
+            referencedColumns: ["wordpress_user_id"]
+          },
+        ]
       }
       user_rate_limits: {
         Row: {
@@ -644,6 +674,51 @@ export type Database = {
           ip_address?: unknown | null
           user_id?: string
           window_start?: string | null
+        }
+        Relationships: []
+      }
+      wordpress_users: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string
+          id: string
+          last_login_at: string | null
+          supabase_user_id: string | null
+          token_expires_at: string | null
+          updated_at: string
+          username: string
+          wordpress_token: string | null
+          wordpress_user_id: number
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email: string
+          id?: string
+          last_login_at?: string | null
+          supabase_user_id?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          username: string
+          wordpress_token?: string | null
+          wordpress_user_id: number
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          id?: string
+          last_login_at?: string | null
+          supabase_user_id?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          username?: string
+          wordpress_token?: string | null
+          wordpress_user_id?: number
         }
         Relationships: []
       }
