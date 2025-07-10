@@ -9,9 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Menu, Home, Bell, Calendar, Table, MessageSquare, Users, Trophy, Settings, Search, Moon, Sun, User, LogOut } from "lucide-react";
+import { Menu, Home, Bell, Calendar, Table, MessageSquare, Users, Trophy, Settings, Search, User, LogOut } from "lucide-react";
 import { useWordPressAuth } from "@/contexts/WordPressAuthContext";
-import { useDarkMode } from "@/contexts/DarkModeContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface HeaderMenuProps {
@@ -22,7 +21,6 @@ export const HeaderMenu = ({ onSearchClick }: HeaderMenuProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, logout } = useWordPressAuth();
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const isMobile = useIsMobile();
 
   const menuItems = [
@@ -76,7 +74,7 @@ export const HeaderMenu = ({ onSearchClick }: HeaderMenuProps) => {
         {/* Mobile-only utilities */}
         {isMobile && (
           <>
-            {/* User info on mobile */}
+            {/* User info on mobile - only show if not authenticated (since avatar is now in header) */}
             {isAuthenticated && user && (
               <>
                 <div className="flex items-center gap-3 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
@@ -108,21 +106,6 @@ export const HeaderMenu = ({ onSearchClick }: HeaderMenuProps) => {
             >
               <Search className="w-4 h-4" />
               <span className="font-medium">Zoeken</span>
-            </DropdownMenuItem>
-
-            {/* Dark mode toggle for mobile */}
-            <DropdownMenuItem
-              onClick={toggleDarkMode}
-              className="flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors focus:ring-2 focus:ring-az-red hover:bg-az-red/5 dark:hover:bg-az-red/10 text-premium-gray-700 dark:text-gray-200 hover:text-az-red dark:hover:text-az-red"
-            >
-              {isDarkMode ? (
-                <Sun className="w-4 h-4" />
-              ) : (
-                <Moon className="w-4 h-4" />
-              )}
-              <span className="font-medium">
-                {isDarkMode ? "Lichte modus" : "Donkere modus"}
-              </span>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />

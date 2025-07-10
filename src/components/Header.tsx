@@ -62,9 +62,44 @@ export const Header = () => {
               />
             </div>
 
-            {/* Mobile Actions - Only notifications and hamburger menu */}
+            {/* Mobile Actions - User avatar, notifications, dark mode, and hamburger menu */}
             {isMobile ? (
               <div className="flex items-center gap-3">
+                {/* User Avatar on Mobile */}
+                {isAuthenticated && user && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full p-0"
+                      >
+                        {user.avatar_url ? (
+                          <img
+                            src={user.avatar_url}
+                            alt={user.display_name}
+                            className="h-8 w-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <User className="h-5 w-5" />
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <div className="flex flex-col space-y-1 p-2">
+                        <p className="text-sm font-medium">{user.display_name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Uitloggen
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                
+                {/* Notifications */}
                 <button 
                   onClick={handleNotificationClick}
                   className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative focus:ring-2 focus:ring-az-red"
@@ -77,6 +112,21 @@ export const Header = () => {
                     </div>
                   )}
                 </button>
+
+                {/* Dark Mode Toggle */}
+                <button 
+                  onClick={toggleDarkMode}
+                  className="p-2 hover:bg-premium-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:ring-2 focus:ring-az-red"
+                  aria-label={isDarkMode ? "Schakel naar lichte modus" : "Schakel naar donkere modus"}
+                >
+                  {isDarkMode ? (
+                    <Sun className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-premium-gray-600 dark:text-gray-300" />
+                  )}
+                </button>
+
+                {/* Hamburger Menu */}
                 <HeaderMenu onSearchClick={handleSearchClick} />
               </div>
             ) : (
