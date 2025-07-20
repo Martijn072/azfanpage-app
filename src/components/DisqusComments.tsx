@@ -30,13 +30,7 @@ export const DisqusComments = ({
   } = useDisqusLoader({ 
     slug, 
     title, 
-    articleId,
-    enhancedConfig: enhanceDisqusForDarkMode({
-      identifier: slug || articleId,
-      title,
-      colorScheme: isDarkMode ? 'dark' : 'light',
-      theme: isDarkMode ? 'dark' : 'light'
-    })
+    articleId
   });
 
   // Enhanced intersection observer for lazy loading
