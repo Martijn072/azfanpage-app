@@ -6,7 +6,7 @@ import { ArticlesSkeleton } from "@/components/ArticlesSkeleton";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { Header } from "@/components/Header";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { WordPressComments } from "@/components/WordPressComments";
+import { DisqusComments } from "@/components/DisqusComments";
 import { ShareBar } from "@/components/ShareBar";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { TTSButton } from "@/components/TTSButton";
@@ -555,9 +555,10 @@ const ArticleDetail = () => {
 
         {/* Comments only show for online content */}
         {!isShowingCachedContent && (
-          <WordPressComments
-            articleId={id!}
+          <DisqusComments
+            slug={displayArticle.slug}
             title={displayArticle.title}
+            articleId={displayArticle.id.toString()}
           />
         )}
 
