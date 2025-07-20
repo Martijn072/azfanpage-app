@@ -1,6 +1,7 @@
 
+import React from 'react';
+import { MessageCircle, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Loader2, ArrowRight } from 'lucide-react';
 
 interface DisqusContainerProps {
   isLoaded: boolean;
@@ -22,97 +23,99 @@ export const DisqusContainer = ({
   isDarkMode
 }: DisqusContainerProps) => {
   return (
-    <>
-      <h3 className="headline-premium text-headline-sm mb-4 text-az-black dark:text-white flex items-center gap-2">
-        <MessageCircle className="w-5 h-5 text-az-red" />
-        Reacties (Legacy Disqus)
-        {currentIdentifier && (
-          <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">
-            ID: {currentIdentifier}
-          </span>
-        )}
-      </h3>
-      
-      {/* Migration Notice */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-        <div className="flex items-start gap-3">
-          <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-          <div className="flex-1">
-            <h4 className="headline-premium text-headline-sm text-blue-900 dark:text-blue-100 mb-2">
-              Nieuw Comment Systeem Beschikbaar
+    <div className="space-y-4">
+      {/* Comments Section Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="w-5 h-5 text-az-red" />
+          <h3 className="text-lg font-semibold text-az-black dark:text-white">
+            Reacties
+          </h3>
+        </div>
+      </div>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-premium-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center justify-center gap-3">
+            <Loader2 className="w-5 h-5 animate-spin text-az-red" />
+            <span className="text-premium-gray-600 dark:text-gray-300">
+              Reacties laden...
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800 p-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="font-medium text-red-700 dark:text-red-300 mb-2">
+                Fout bij laden van reacties
+              </h4>
+              <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+                {error}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  onClick={onLoadDisqus}
+                  size="sm"
+                  variant="outline"
+                  className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-600 dark:text-red-300"
+                >
+                  Opnieuw proberen
+                </Button>
+                <Button
+                  onClick={onResetDisqus}
+                  size="sm"
+                  variant="ghost"
+                  className="text-red-600 hover:bg-red-50 dark:text-red-400"
+                >
+                  <RefreshCw className="w-4 h-4 mr-1" />
+                  Reset
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Not Loaded State */}
+      {!isLoaded && !isLoading && !error && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-premium-gray-200 dark:border-gray-700 p-6">
+          <div className="text-center">
+            <MessageCircle className="w-12 h-12 text-premium-gray-300 dark:text-gray-600 mx-auto mb-3" />
+            <h4 className="text-lg font-medium text-premium-gray-700 dark:text-gray-300 mb-2">
+              Reacties laden
             </h4>
-            <p className="body-premium text-body-sm text-blue-800 dark:text-blue-200 mb-3">
-              We hebben een nieuw, sneller comment systeem ontwikkeld dat beter integreert met onze app. 
-              Het oude Disqus systeem blijft beschikbaar maar wordt binnenkort vervangen.
+            <p className="text-sm text-premium-gray-500 dark:text-gray-400 mb-4">
+              Klik om de reacties te laden
             </p>
-            <Button 
-              onClick={() => window.location.reload()} 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2"
-              size="sm"
+            <Button
+              onClick={onLoadDisqus}
+              className="bg-az-red hover:bg-red-700 text-white"
             >
-              Probeer Nieuwe Comments
-              <ArrowRight className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Reacties laden
             </Button>
           </div>
         </div>
-      </div>
-      
-      {!isLoaded && !isLoading && !error && (
-        <div className="text-center py-8">
-          <p className="body-premium text-body-md text-premium-gray-600 dark:text-gray-300 mb-4">
-            Deel je mening over dit artikel met je medesupporters en doe dat op respectvolle wijze.
-          </p>
-          <Button 
-            onClick={onLoadDisqus} 
-            className="bg-az-red hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2 mx-auto"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Legacy Reacties laden
-          </Button>
+      )}
+
+      {/* Debug Info (only in development) */}
+      {currentIdentifier && process.env.NODE_ENV === 'development' && (
+        <div className="text-xs text-premium-gray-500 dark:text-gray-400 p-2 bg-premium-gray-50 dark:bg-gray-800 rounded">
+          <strong>Debug:</strong> Actieve identifier: {currentIdentifier}
         </div>
       )}
 
-      {error && (
-        <div className="text-center py-8">
-          <p className="body-premium text-body-md text-red-600 dark:text-red-400 mb-4">
-            {error}
-          </p>
-          <Button 
-            onClick={onResetDisqus} 
-            variant="outline" 
-            className="px-6 py-3 border-az-red text-az-red hover:bg-az-red hover:text-white transition-all duration-200"
-          >
-            Opnieuw proberen
-          </Button>
-        </div>
-      )}
-
-      {/* Enhanced Disqus container with filter-based dark mode support */}
-      {(isLoading || isLoaded) && (
-        <div className={`bg-white dark:bg-gray-800 rounded-lg border border-premium-gray-100 dark:border-gray-700 overflow-hidden ${isDarkMode ? 'disqus-dark-theme disqus-inverted' : 'disqus-light-theme'}`}>
-          {isLoading && (
-            <div className="text-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-az-red mx-auto mb-4" />
-              <p className="body-premium text-body-sm text-premium-gray-600 dark:text-gray-300">
-                Legacy Disqus comments laden...
-              </p>
-            </div>
-          )}
-          <div 
-            id="disqus_thread" 
-            className={`p-4 min-h-[200px] ${isDarkMode ? 'disqus-dark-mode disqus-inverted' : ''}`}
-          ></div>
-        </div>
-      )}
-
-      {/* Debug info when loaded */}
-      {isLoaded && currentIdentifier && (
-        <div className="text-center mt-4">
-          <p className="text-xs text-premium-gray-400 dark:text-gray-500">
-            Powered by Disqus (Legacy) • Werkende identifier: {currentIdentifier} • Theme: {isDarkMode ? 'Dark (Inverted)' : 'Light'}
-          </p>
-        </div>
-      )}
-    </>
+      {/* Disqus Container */}
+      <div 
+        id="disqus_thread" 
+        className={`min-h-[200px] ${isDarkMode ? 'disqus-dark-mode disqus-inverted' : ''}`}
+      />
+    </div>
   );
 };
