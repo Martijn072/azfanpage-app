@@ -142,7 +142,7 @@ serve(async (req: Request) => {
         });
       }
 
-      console.log('🔑 Admin token found, length:', adminToken.length);
+      console.log('🔑 Admin token found, validating format...');
 
       // Check if token is in username:password format
       if (!adminToken.includes(':')) {
@@ -160,27 +160,49 @@ serve(async (req: Request) => {
       const basicAuthHeader = `Basic ${btoa(adminToken)}`;
       console.log('🔐 Basic auth header created successfully');
       
-      // First, test if the WordPress REST API is accessible
-      console.log('🔍 Testing WordPress REST API accessibility...');
+      // Test WordPress REST API accessibility with new token
+      console.log('🔍 Testing WordPress REST API with updated credentials...');
       try {
         const testResponse = await fetch(`${WORDPRESS_API_BASE}/users`, {
           method: 'GET',
           headers: {
-            'Authorization': basicAuthHeader
+            'Authorization': basicAuthHeader,
+            'Content-Type': 'application/json'
           }
         });
         
         console.log('📊 REST API test response status:', testResponse.status);
-        console.log('📊 REST API test response headers:', Object.fromEntries(testResponse.headers.entries()));
         
         if (!testResponse.ok) {
           const testError = await testResponse.text();
           console.log('❌ REST API test failed:', testError);
+          
+          if (testResponse.status === 401) {
+            return new Response(JSON.stringify({
+              success: false,
+              message: 'WordPress authenticatie mislukt. Controleer je Application Password.',
+              debug: {
+                status: testResponse.status,
+                error: testError
+              }
+            }), {
+              status: 401,
+              headers: { 'Content-Type': 'application/json', ...corsHeaders }
+            });
+          }
         } else {
-          console.log('✅ REST API is accessible');
+          console.log('✅ REST API is accessible with new credentials');
         }
       } catch (testError) {
         console.error('💥 REST API test error:', testError);
+        return new Response(JSON.stringify({
+          success: false,
+          message: 'Kan WordPress API niet bereiken',
+          debug: testError.message
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
       }
 
       console.log('🔄 Attempting WordPress user registration...');
@@ -207,14 +229,12 @@ serve(async (req: Request) => {
       });
 
       console.log('📡 WordPress API response status:', registerResponse.status);
-      console.log('📡 WordPress API response headers:', Object.fromEntries(registerResponse.headers.entries()));
 
       const registerData = await registerResponse.json();
-      console.log('📄 WordPress API full response:', JSON.stringify(registerData, null, 2));
+      console.log('📄 WordPress API response:', JSON.stringify(registerData, null, 2));
 
       if (!registerResponse.ok) {
         console.log('❌ WordPress registration failed with status:', registerResponse.status);
-        console.log('❌ WordPress error details:', registerData);
         
         // Provide more specific error messages
         let errorMessage = 'Registratie mislukt';
@@ -226,7 +246,7 @@ serve(async (req: Request) => {
         } else if (registerData.code === 'rest_user_invalid_email') {
           errorMessage = 'Ongeldig e-mailadres';
         } else if (registerData.code === 'rest_cannot_create_user') {
-          errorMessage = 'Geen toestemming om gebruikers aan te maken. Controleer WordPress instellingen en gebruikersrechten.';
+          errorMessage = 'Geen toestemming om gebruikers aan te maken. Controleer WordPress instellingen en Application Password rechten.';
         } else if (registerData.message) {
           errorMessage = registerData.message;
         }
@@ -244,7 +264,7 @@ serve(async (req: Request) => {
         });
       }
 
-      console.log('✅ WordPress registration successful:', registerData);
+      console.log('✅ WordPress registration successful!');
 
       // After successful registration, automatically log the user in
       console.log('🔄 Auto-login after registration...');
