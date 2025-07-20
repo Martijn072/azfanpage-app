@@ -73,6 +73,11 @@ const ConferenceLeague = () => {
       <Header />
       
       <main className="px-4 pb-20 pt-6 bg-white dark:bg-gray-900 min-h-screen">
+        {/* Page Title */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-az-black dark:text-white">AZ in Europa</h1>
+        </div>
+
         {/* AZ in Europa Status */}
         <div className="mb-8">
           <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700 shadow-sm">

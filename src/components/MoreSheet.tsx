@@ -15,9 +15,9 @@ export const MoreSheet = ({ children }: MoreSheetProps) => {
   const mainMenuItems = [
     {
       icon: Trophy,
-      label: "Conference League",
+      label: "AZ in Europa",
       path: "/conference-league",
-      description: "Stand en programma Conference League"
+      description: "Europese wedstrijden en voortgang"
     },
     {
       icon: Users,
