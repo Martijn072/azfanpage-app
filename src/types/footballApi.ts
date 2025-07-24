@@ -80,3 +80,17 @@ export interface Standing {
     goals: { for: number; against: number };
   };
 }
+
+export interface FixtureStatistic {
+  type: string;
+  value: string | number;
+}
+
+export interface TeamStatistics {
+  team: {
+    id: number;
+    name: string;
+    logo: string;
+  };
+  statistics: FixtureStatistic[];
+}

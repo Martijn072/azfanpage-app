@@ -8,8 +8,14 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Calendar, MapPin, Users, Target, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useFixtureEvents } from "@/hooks/useFixtureEvents";
+import { useFixtureLineups } from "@/hooks/useFixtureLineups";
+import { FixtureEventCard } from "@/components/FixtureEventCard";
+import { FixtureLineupDisplay } from "@/components/FixtureLineupDisplay";
+import { LiveEventIndicator } from "@/components/LiveEventIndicator";
 
 interface FixtureDetail {
   fixture: {
@@ -103,6 +109,7 @@ const WedstrijdDetail = () => {
   const { fixtureId } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("programma");
+  const [selectedMatchTab, setSelectedMatchTab] = useState("overzicht");
 
   const { data: fixtureData, isLoading: fixtureLoading } = useQuery({
     queryKey: ['fixture-detail', fixtureId],
@@ -115,16 +122,8 @@ const WedstrijdDetail = () => {
     enabled: !!fixtureId,
   });
 
-  const { data: eventsData, isLoading: eventsLoading } = useQuery({
-    queryKey: ['fixture-events', fixtureId],
-    queryFn: async () => {
-      const response = await callFootballApi('/fixtures/events', {
-        fixture: fixtureId!
-      });
-      return response.response as FixtureEvent[];
-    },
-    enabled: !!fixtureId,
-  });
+  const { data: eventsData, isLoading: eventsLoading } = useFixtureEvents(fixtureId || null);
+  const { data: lineupsData, isLoading: lineupsLoading } = useFixtureLineups(fixtureId || null);
 
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['fixture-statistics', fixtureId],
@@ -278,14 +277,10 @@ const WedstrijdDetail = () => {
               <Badge className="text-xs bg-premium-gray-100 text-premium-gray-700 dark:bg-gray-700 dark:text-gray-300 border-none">
                 {fixtureData.league.name}
               </Badge>
-              {fixtureData.fixture.status.short === 'LIVE' && (
-                <Badge 
-                  variant="default"
-                  className="bg-az-red text-white hover:bg-red-700"
-                >
-                  {getStatusText(fixtureData.fixture.status.short)}
-                </Badge>
-              )}
+              <LiveEventIndicator 
+                status={fixtureData.fixture.status.short}
+                elapsed={fixtureData.fixture.status.elapsed}
+              />
             </div>
             
             {/* Teams and score - Mobile-first layout like AZFixtures */}
@@ -354,88 +349,155 @@ const WedstrijdDetail = () => {
           </CardHeader>
         </Card>
 
-        {/* Events */}
-        {eventsData && eventsData.length > 0 && (
-          <Card className="mb-6 bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-az-black dark:text-white">
-                <Clock className="w-5 h-5 text-az-red" />
-                Wedstrijdverloop
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {eventsData.map((event, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-premium-gray-50 dark:bg-gray-700 rounded-lg border border-premium-gray-100 dark:border-gray-600">
-                    <div className="w-8 text-center font-bold text-sm bg-az-red text-white rounded px-1 py-1">
-                      {event.time.elapsed}'
-                    </div>
-                    <div className="text-lg">
-                      {getEventIcon(event.type)}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-sm text-az-black dark:text-white">
-                        {event.player.name}
-                        {event.type === 'Goal' && event.assist?.name && (
-                          <span className="text-premium-gray-600 dark:text-gray-400 font-normal"> (assist: {event.assist.name})</span>
-                        )}
-                      </div>
-                      <div className="text-xs text-premium-gray-600 dark:text-gray-400">
-                        {getEventTypeText(event.type, event.detail)} - <span className="font-medium text-az-red">{event.team.name}</span>
-                      </div>
-                    </div>
+        {/* Match Details Tabs */}
+        <Tabs value={selectedMatchTab} onValueChange={setSelectedMatchTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 bg-premium-gray-100 dark:bg-gray-800">
+            <TabsTrigger value="overzicht">Overzicht</TabsTrigger>
+            <TabsTrigger value="live">Live</TabsTrigger>
+            <TabsTrigger value="opstellingen">Opstellingen</TabsTrigger>
+            <TabsTrigger value="statistieken">Statistieken</TabsTrigger>
+          </TabsList>
+
+          {/* Overzicht Tab */}
+          <TabsContent value="overzicht" className="space-y-6">
+            {/* Match info */}
+            <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700">
+              <CardContent className="pt-6">
+                <div className="space-y-2 text-sm text-premium-gray-600 dark:text-gray-400">
+                  <div className="flex items-center justify-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>{formatDate(fixtureData.fixture.date)}</span>
                   </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{fixtureData.fixture.venue.name}, {fixtureData.fixture.venue.city}</span>
+                  </div>
+                  {fixtureData.fixture.referee && (
+                    <div className="flex items-center justify-center gap-2">
+                      <Users className="w-4 h-4" />
+                      <span>Scheidsrechter: {fixtureData.fixture.referee}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Live Events Tab */}
+          <TabsContent value="live" className="space-y-6">
+            {eventsLoading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Statistics */}
-        {statsData && statsData.length > 0 && (
-          <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-az-black dark:text-white">
-                <Target className="w-5 h-5 text-az-red" />
-                Statistieken
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {statsData[0]?.statistics.map((stat, index) => {
-                  const homeStat = statsData[0]?.statistics[index];
-                  const awayStat = statsData[1]?.statistics[index];
-                  
-                  if (!homeStat || !awayStat) return null;
-                  
-                  return (
-                    <div key={stat.type} className="space-y-2">
-                      <div className="text-center text-sm text-premium-gray-600 dark:text-gray-400 font-medium">
-                        {translateStatType(stat.type)}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="text-center flex-1">
-                          <span className="font-bold text-az-red">{homeStat.value}</span>
-                        </div>
-                        <div className="text-center flex-1">
-                          <span className="font-bold text-az-red">{awayStat.value}</span>
-                        </div>
-                      </div>
-                      <div className="h-2 bg-premium-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-az-red transition-all duration-300"
-                          style={{ 
-                            width: `${(parseFloat(String(homeStat.value)) / (parseFloat(String(homeStat.value)) + parseFloat(String(awayStat.value)))) * 100}%` 
-                          }}
+            ) : eventsData && eventsData.length > 0 ? (
+              <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-az-black dark:text-white">
+                    <Clock className="w-5 h-5 text-az-red" />
+                    Wedstrijdverloop
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {eventsData.map((event, index) => {
+                      const isAZEvent = event.team.name.toLowerCase().includes('az');
+                      return (
+                        <FixtureEventCard 
+                          key={index}
+                          event={event}
+                          isAZEvent={isAZEvent}
                         />
-                      </div>
-                    </div>
-                  );
-                })}
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700">
+                <CardContent className="text-center py-8">
+                  <p className="text-premium-gray-600 dark:text-gray-300">
+                    Nog geen wedstrijdgebeurtenissen
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Lineups Tab */}
+          <TabsContent value="opstellingen" className="space-y-6">
+            {lineupsLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-64 w-full" />
               </div>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <FixtureLineupDisplay 
+                homeLineup={lineupsData?.[0] || null}
+                awayLineup={lineupsData?.[1] || null}
+              />
+            )}
+          </TabsContent>
+
+          {/* Statistics Tab */}
+          <TabsContent value="statistieken" className="space-y-6">
+            {statsLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : statsData && statsData.length > 0 ? (
+              <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-az-black dark:text-white">
+                    <Target className="w-5 h-5 text-az-red" />
+                    Statistieken
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {statsData[0]?.statistics.map((stat, index) => {
+                      const homeStat = statsData[0]?.statistics[index];
+                      const awayStat = statsData[1]?.statistics[index];
+                      
+                      if (!homeStat || !awayStat) return null;
+                      
+                      return (
+                        <div key={stat.type} className="space-y-2">
+                          <div className="text-center text-sm text-premium-gray-600 dark:text-gray-400 font-medium">
+                            {translateStatType(stat.type)}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="text-center flex-1">
+                              <span className="font-bold text-az-red">{homeStat.value}</span>
+                            </div>
+                            <div className="text-center flex-1">
+                              <span className="font-bold text-az-red">{awayStat.value}</span>
+                            </div>
+                          </div>
+                          <div className="h-2 bg-premium-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-az-red transition-all duration-300"
+                              style={{ 
+                                width: `${(parseFloat(String(homeStat.value)) / (parseFloat(String(homeStat.value)) + parseFloat(String(awayStat.value)))) * 100}%` 
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700">
+                <CardContent className="text-center py-8">
+                  <p className="text-premium-gray-600 dark:text-gray-300">
+                    Statistieken nog niet beschikbaar
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
