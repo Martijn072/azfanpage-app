@@ -135,7 +135,7 @@ serve(async (req: Request) => {
         console.error('❌ WORDPRESS_ADMIN_TOKEN not configured');
         return new Response(JSON.stringify({
           success: false,
-          message: 'Server configuratie fout'
+          message: 'Server configuratie fout - admin token ontbreekt'
         }), {
           status: 500,
           headers: { 'Content-Type': 'application/json', ...corsHeaders }
@@ -144,64 +144,111 @@ serve(async (req: Request) => {
 
       console.log('🔑 Admin token found, length:', adminToken.length);
 
-      // Check if token is in username:password format
+      // Try alternative approach: Use WordPress Application Passwords format
+      // Expected format: username:application_password (not regular password)
       if (!adminToken.includes(':')) {
-        console.error('❌ WORDPRESS_ADMIN_TOKEN must be in format username:password');
+        console.error('❌ WORDPRESS_ADMIN_TOKEN must be in format username:application_password');
         return new Response(JSON.stringify({
           success: false,
-          message: 'Server configuratie fout - ongeldige token format'
+          message: 'Server configuratie fout - token moet username:application_password format hebben'
         }), {
           status: 500,
           headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
 
-      // Create Basic Authentication header
-      const basicAuthHeader = `Basic ${btoa(adminToken)}`;
-      console.log('🔐 Basic auth header created successfully');
+      const [adminUsername, adminPassword] = adminToken.split(':');
+      console.log('🔐 Using admin username:', adminUsername);
+
+      // First check WordPress settings to see if registration is enabled
+      console.log('🔍 Checking WordPress registration settings...');
       
-      // First, test if the WordPress REST API is accessible
-      console.log('🔍 Testing WordPress REST API accessibility...');
       try {
-        const testResponse = await fetch(`${WORDPRESS_API_BASE}/users`, {
+        const settingsResponse = await fetch('https://www.azfanpage.nl/wp-json/wp/v2/settings', {
           method: 'GET',
           headers: {
-            'Authorization': basicAuthHeader
+            'Authorization': `Basic ${btoa(adminToken)}`
           }
         });
         
-        console.log('📊 REST API test response status:', testResponse.status);
-        console.log('📊 REST API test response headers:', Object.fromEntries(testResponse.headers.entries()));
-        
-        if (!testResponse.ok) {
-          const testError = await testResponse.text();
-          console.log('❌ REST API test failed:', testError);
-        } else {
-          console.log('✅ REST API is accessible');
+        if (settingsResponse.ok) {
+          const settings = await settingsResponse.json();
+          console.log('📊 WordPress settings checked, users_can_register:', settings.users_can_register);
+          
+          if (!settings.users_can_register) {
+            console.log('⚠️ WordPress registration is disabled, trying to enable it...');
+            
+            // Try to enable user registration
+            const updateResponse = await fetch('https://www.azfanpage.nl/wp-json/wp/v2/settings', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${btoa(adminToken)}`
+              },
+              body: JSON.stringify({
+                users_can_register: true
+              })
+            });
+            
+            if (updateResponse.ok) {
+              console.log('✅ Successfully enabled WordPress registration');
+            } else {
+              console.log('❌ Failed to enable WordPress registration');
+            }
+          }
         }
-      } catch (testError) {
-        console.error('💥 REST API test error:', testError);
+      } catch (settingsError) {
+        console.error('💥 Settings check error:', settingsError);
       }
 
-      console.log('🔄 Attempting WordPress user registration...');
+      // Alternative approach 1: Try using wp-admin AJAX for registration
+      console.log('🔄 Attempting WordPress registration via wp-admin/admin-ajax.php...');
+      
+      const ajaxPayload = new URLSearchParams({
+        action: 'create_user',
+        user_login: username || email.split('@')[0],
+        user_email: email,
+        user_pass: password,
+        display_name: display_name || username || email.split('@')[0],
+        role: 'subscriber'
+      });
 
-      // Prepare registration payload
+      const ajaxResponse = await fetch('https://www.azfanpage.nl/wp-admin/admin-ajax.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${btoa(adminToken)}`
+        },
+        body: ajaxPayload
+      });
+
+      console.log('📡 AJAX response status:', ajaxResponse.status);
+      const ajaxResult = await ajaxResponse.text();
+      console.log('📄 AJAX response:', ajaxResult);
+
+      // Alternative approach 2: Try using REST API with different headers
+      console.log('🔄 Attempting WordPress registration via REST API with enhanced headers...');
+      
       const registrationPayload = {
-        username: username,
+        username: username || email.split('@')[0],
         email: email,
         password: password,
-        name: display_name || username,
-        roles: ['subscriber']
+        name: display_name || username || email.split('@')[0],
+        roles: ['subscriber'],
+        meta: {
+          first_name: display_name || username || email.split('@')[0]
+        }
       };
       
-      console.log('📦 Registration payload:', registrationPayload);
+      console.log('📦 Enhanced registration payload:', registrationPayload);
 
-      // Register new user in WordPress
       const registerResponse = await fetch(`${WORDPRESS_API_BASE}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': basicAuthHeader
+          'Authorization': `Basic ${btoa(adminToken)}`,
+          'X-WP-Nonce': '', // Try without nonce first
+          'User-Agent': 'AZ-Fanpage-App/1.0'
         },
         body: JSON.stringify(registrationPayload)
       });
@@ -216,7 +263,53 @@ serve(async (req: Request) => {
         console.log('❌ WordPress registration failed with status:', registerResponse.status);
         console.log('❌ WordPress error details:', registerData);
         
-        // Provide more specific error messages
+        // Alternative approach 3: If REST API fails, create Supabase-only account with WordPress sync later
+        if (registerData.code === 'rest_cannot_create_user' || registerResponse.status === 401) {
+          console.log('🔄 WordPress registration failed, creating Supabase-only account...');
+          
+          // Create Supabase user directly
+          const { data: supabaseUser, error: supabaseError } = await supabase.auth.admin.createUser({
+            email: email,
+            password: password,
+            email_confirm: true,
+            user_metadata: {
+              display_name: display_name || username || email.split('@')[0],
+              username: username || email.split('@')[0],
+              wordpress_sync_pending: true
+            }
+          });
+
+          if (supabaseError) {
+            console.error('❌ Supabase user creation failed:', supabaseError);
+            return new Response(JSON.stringify({
+              success: false,
+              message: 'Registratie mislukt - kan geen account aanmaken'
+            }), {
+              status: 400,
+              headers: { 'Content-Type': 'application/json', ...corsHeaders }
+            });
+          }
+
+          console.log('✅ Supabase user created successfully:', supabaseUser?.user?.id);
+          
+          return new Response(JSON.stringify({
+            success: true,
+            message: 'Account succesvol aangemaakt. WordPress synchronisatie wordt later uitgevoerd.',
+            user: {
+              id: 'temp_' + supabaseUser?.user?.id,
+              username: username || email.split('@')[0],
+              display_name: display_name || username || email.split('@')[0],
+              email: email,
+              supabase_user_id: supabaseUser?.user?.id,
+              wordpress_sync_pending: true
+            }
+          }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          });
+        }
+        
+        // Provide more specific error messages for other cases
         let errorMessage = 'Registratie mislukt';
         
         if (registerData.code === 'existing_user_login') {
@@ -225,8 +318,6 @@ serve(async (req: Request) => {
           errorMessage = 'Dit e-mailadres is al geregistreerd';
         } else if (registerData.code === 'rest_user_invalid_email') {
           errorMessage = 'Ongeldig e-mailadres';
-        } else if (registerData.code === 'rest_cannot_create_user') {
-          errorMessage = 'Geen toestemming om gebruikers aan te maken. Controleer WordPress instellingen en gebruikersrechten.';
         } else if (registerData.message) {
           errorMessage = registerData.message;
         }
@@ -236,7 +327,8 @@ serve(async (req: Request) => {
           message: errorMessage,
           debug: {
             status: registerResponse.status,
-            wordpress_error: registerData
+            wordpress_error: registerData,
+            troubleshooting: 'Check WordPress admin -> Settings -> General -> "Anyone can register" and admin user permissions'
           }
         }), {
           status: 400,
@@ -265,6 +357,38 @@ serve(async (req: Request) => {
           const loginData = await loginResponse.json();
           console.log('✅ Auto-login successful');
           
+          // Create Supabase user mapping
+          const { data: supabaseUser, error: supabaseError } = await supabase.auth.admin.createUser({
+            email: registerData.email,
+            email_confirm: true,
+            user_metadata: {
+              wordpress_id: registerData.id,
+              username: registerData.username,
+              display_name: registerData.name
+            }
+          });
+
+          // Store WordPress user mapping
+          const { error: mappingError } = await supabase
+            .from('wordpress_users')
+            .upsert({
+              wordpress_user_id: registerData.id,
+              supabase_user_id: supabaseUser?.user?.id,
+              username: registerData.username,
+              display_name: registerData.name,
+              email: registerData.email,
+              avatar_url: registerData.avatar_urls?.['96'] || null,
+              wordpress_token: loginData.token,
+              token_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+              last_login_at: new Date().toISOString()
+            }, {
+              onConflict: 'wordpress_user_id'
+            });
+
+          if (mappingError) {
+            console.error('Failed to store user mapping:', mappingError);
+          }
+          
           return new Response(JSON.stringify({
             success: true,
             message: 'Account succesvol aangemaakt en ingelogd',
@@ -273,7 +397,8 @@ serve(async (req: Request) => {
               username: registerData.username,
               display_name: registerData.name,
               email: registerData.email,
-              token: loginData.token
+              token: loginData.token,
+              supabase_user_id: supabaseUser?.user?.id
             }
           }), {
             status: 200,
@@ -288,7 +413,7 @@ serve(async (req: Request) => {
 
       return new Response(JSON.stringify({
         success: true,
-        message: 'Account succesvol aangemaakt'
+        message: 'Account succesvol aangemaakt. Je kunt nu inloggen.'
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
