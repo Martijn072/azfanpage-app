@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { useAddComment } from '@/hooks/useComments';
-import { useWordPressAuth } from '@/contexts/WordPressAuthContext';
-import { UserAvatar } from '@/components/UserAvatar';
 
 interface CommentFormProps {
   articleId: string;
@@ -22,21 +21,9 @@ export const CommentForm = ({
   compact = false 
 }: CommentFormProps) => {
   const [content, setContent] = useState('');
-  const { user, isAuthenticated } = useWordPressAuth();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const addComment = useAddComment();
-
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="bg-muted/50 rounded-lg p-6 text-center border border-border">
-        <p className="text-muted-foreground mb-4">
-          Je moet ingelogd zijn om een reactie te plaatsen
-        </p>
-        <Button asChild variant="default">
-          <a href="/auth">Inloggen</a>
-        </Button>
-      </div>
-    );
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,17 +35,15 @@ export const CommentForm = ({
         articleId,
         commentData: {
           content: content.trim(),
-          author_name: user.display_name,
-          author_email: user.email,
+          author_name: name.trim() || 'Anoniem',
+          author_email: email.trim() || null,
           parent_id: parentId || null
-        },
-        wordpressData: {
-          wordpress_user_id: user.id,
-          author_avatar_url: user.avatar_url
         }
       });
       
       setContent('');
+      setName('');
+      setEmail('');
       onSuccess?.();
     } catch (error) {
       console.error('Error submitting comment:', error);
@@ -68,13 +53,29 @@ export const CommentForm = ({
   return (
     <div className="space-y-4 bg-card rounded-lg p-4 border border-border">
       <div className="flex items-start gap-3">
-        <UserAvatar size="md" />
+        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+          <User className="h-4 w-4 text-muted-foreground" />
+        </div>
         <div className="flex-1">
-          <p className="text-sm font-medium text-foreground mb-3">
-            Reageren als {user.display_name}
-          </p>
-          
           <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Input
+                placeholder="Je naam (optioneel)"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="bg-background border-border focus:border-primary"
+                maxLength={50}
+              />
+              <Input
+                type="email"
+                placeholder="Je e-mail (optioneel)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-background border-border focus:border-primary"
+                maxLength={100}
+              />
+            </div>
+            
             <div className="relative">
               <Textarea
                 placeholder={placeholder}
@@ -101,7 +102,7 @@ export const CommentForm = ({
               <span>{content.length}/1000 tekens</span>
               {content.trim() && (
                 <span className="text-green-600 dark:text-green-400">
-                  Druk Enter + Ctrl om te verzenden
+                  Reactie plaatsen
                 </span>
               )}
             </div>

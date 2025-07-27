@@ -80,62 +80,41 @@ export const useAddComment = () => {
   return useMutation({
     mutationFn: async ({ 
       articleId, 
-      commentData, 
-      wordpressData 
+      commentData
     }: { 
       articleId: string; 
       commentData: CommentFormData;
-      wordpressData?: WordPressCommentData;
     }) => {
       console.log('💬 Adding new comment:', commentData);
       
-      // For WordPress authenticated users
-      if (wordpressData?.wordpress_user_id) {
-        const { data, error } = await supabase
-          .from('secure_comments')
-          .insert({
-            article_id: articleId,
-            content: commentData.content,
-            author_name: commentData.author_name,
-            author_email: commentData.author_email || null,
-            author_avatar_url: wordpressData.author_avatar_url || null,
-            wordpress_user_id: wordpressData.wordpress_user_id,
-            parent_id: commentData.parent_id || null,
-            user_id: `wp-${wordpressData.wordpress_user_id}`, // Use WordPress ID as user_id
-          })
-          .select()
-          .single();
-
-        if (error) {
-          console.error('❌ Error adding comment:', error);
-          throw error;
-        }
-
-        console.log('✅ Comment added:', data);
-        return data;
-      } else {
-        // Fallback for anonymous users (if needed)
-        const { data, error } = await supabase
-          .from('secure_comments')
-          .insert({
-            article_id: articleId,
-            content: commentData.content,
-            author_name: commentData.author_name,
-            author_email: commentData.author_email || null,
-            parent_id: commentData.parent_id || null,
-            user_id: 'anonymous-user',
-          })
-          .select()
-          .single();
-
-        if (error) {
-          console.error('❌ Error adding comment:', error);
-          throw error;
-        }
-
-        console.log('✅ Comment added:', data);
-        return data;
+      // Generate anonymous user ID if needed
+      let anonymousUserId = localStorage.getItem('anonymous_user_id');
+      if (!anonymousUserId) {
+        anonymousUserId = crypto.randomUUID();
+        localStorage.setItem('anonymous_user_id', anonymousUserId);
       }
+
+      const { data, error } = await supabase
+        .from('secure_comments')
+        .insert({
+          article_id: articleId,
+          content: commentData.content,
+          author_name: commentData.author_name || 'Anoniem',
+          author_email: commentData.author_email || null,
+          parent_id: commentData.parent_id || null,
+          user_id: anonymousUserId,
+          is_approved: true // Auto-approve anonymous comments
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error adding comment:', error);
+        throw error;
+      }
+
+      console.log('✅ Comment added:', data);
+      return data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['comments', variables.articleId] });
@@ -164,12 +143,19 @@ export const useLikeComment = () => {
     mutationFn: async ({ commentId, userIdentifier }: { commentId: string; userIdentifier: string }) => {
       console.log('👍 Toggling like for comment:', commentId);
       
+      // Use anonymous user ID for likes if no user identifier provided
+      let actualUserIdentifier = userIdentifier;
+      if (!actualUserIdentifier) {
+        actualUserIdentifier = localStorage.getItem('anonymous_user_id') || crypto.randomUUID();
+        localStorage.setItem('anonymous_user_id', actualUserIdentifier);
+      }
+      
       // Check if already liked using comment_reactions
       const { data: existingReaction } = await supabase
         .from('comment_reactions')
         .select('id')
         .eq('comment_id', commentId)
-        .eq('user_id', userIdentifier)
+        .eq('user_id', actualUserIdentifier)
         .eq('reaction_type', 'like')
         .single();
 
@@ -179,7 +165,7 @@ export const useLikeComment = () => {
           .from('comment_reactions')
           .delete()
           .eq('comment_id', commentId)
-          .eq('user_id', userIdentifier)
+          .eq('user_id', actualUserIdentifier)
           .eq('reaction_type', 'like');
 
         if (error) throw error;
@@ -191,7 +177,7 @@ export const useLikeComment = () => {
           .from('comment_reactions')
           .insert({
             comment_id: commentId,
-            user_id: userIdentifier,
+            user_id: actualUserIdentifier,
             reaction_type: 'like',
           });
 
