@@ -212,17 +212,17 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                 onClick={() => handleFixtureClick(fixture.fixture.id)}
                 className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-600 rounded-lg p-4 shadow-sm hover:shadow-md transition-all cursor-pointer hover:bg-premium-gray-50 dark:hover:bg-gray-700"
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="mb-3">
+                  <Badge 
+                    variant="outline"
+                    className="text-xs font-semibold bg-purple-600 text-white hover:bg-purple-700 border-purple-600 mb-2"
+                  >
+                    {participation?.competitionName}
+                  </Badge>
                   <div className="flex items-center gap-2 text-sm text-premium-gray-600 dark:text-gray-300">
                     <Calendar className="w-4 h-4" />
                     <span className="font-medium">{formatDate(fixture.fixture.date)}</span>
                   </div>
-                  <Badge 
-                    variant="outline"
-                    className="text-xs font-semibold bg-purple-600 text-white hover:bg-purple-700 border-purple-600"
-                  >
-                    {participation?.competitionName}
-                  </Badge>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -234,7 +234,7 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                         className="w-8 h-8 object-contain"
                       />
                       <span className="font-semibold text-az-black dark:text-white">
-                        {fixture.teams.home.name}
+                        {fixture.teams.home.name === 'AZ Alkmaar' ? 'AZ' : fixture.teams.home.name}
                       </span>
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                   <div className="flex items-center gap-3 flex-1 justify-end">
                     <div className="flex items-center gap-3">
                       <span className="font-semibold text-az-black dark:text-white">
-                        {fixture.teams.away.name}
+                        {fixture.teams.away.name === 'AZ Alkmaar' ? 'AZ' : fixture.teams.away.name}
                       </span>
                       <img 
                         src={fixture.teams.away.logo} 
@@ -288,17 +288,17 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                 onClick={() => handleFixtureClick(fixture.fixture.id)}
                 className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-600 rounded-lg p-4 shadow-sm hover:shadow-md transition-all cursor-pointer hover:bg-premium-gray-50 dark:hover:bg-gray-700 opacity-75"
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="mb-3">
+                  <Badge 
+                    variant="outline"
+                    className="text-xs font-semibold bg-purple-600 text-white hover:bg-purple-700 border-purple-600 mb-2"
+                  >
+                    {participation?.competitionName}
+                  </Badge>
                   <div className="flex items-center gap-2 text-sm text-premium-gray-600 dark:text-gray-300">
                     <Calendar className="w-4 h-4" />
                     <span className="font-medium">{formatDate(fixture.fixture.date)}</span>
                   </div>
-                  <Badge 
-                    variant="outline"
-                    className="text-xs font-semibold bg-purple-600 text-white hover:bg-purple-700 border-purple-600"
-                  >
-                    {participation?.competitionName}
-                  </Badge>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -310,7 +310,7 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                         className="w-8 h-8 object-contain"
                       />
                       <span className="font-semibold text-az-black dark:text-white">
-                        {fixture.teams.home.name}
+                        {fixture.teams.home.name === 'AZ Alkmaar' ? 'AZ' : fixture.teams.home.name}
                       </span>
                     </div>
                   </div>
@@ -330,7 +330,7 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                   <div className="flex items-center gap-3 flex-1 justify-end">
                     <div className="flex items-center gap-3">
                       <span className="font-semibold text-az-black dark:text-white">
-                        {fixture.teams.away.name}
+                        {fixture.teams.away.name === 'AZ Alkmaar' ? 'AZ' : fixture.teams.away.name}
                       </span>
                       <img 
                         src={fixture.teams.away.logo} 
