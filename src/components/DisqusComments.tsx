@@ -26,17 +26,19 @@ export const DisqusComments = ({
     resetDisqus
   } = useDisqusLoader({ slug, title, articleId });
 
-  // Intersection Observer for lazy loading
+  // Intersection Observer for automatic lazy loading
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !isLoaded && !isLoading) {
+          console.log('🎯 Disqus comments section is visible, auto-loading...');
+          loadDisqus();
           observer.disconnect();
         }
       });
     }, {
       threshold: 0.1,
-      rootMargin: '100px 0px'
+      rootMargin: '200px 0px'
     });
     
     if (containerRef.current) {
@@ -44,7 +46,7 @@ export const DisqusComments = ({
     }
     
     return () => observer.disconnect();
-  }, []);
+  }, [isLoaded, isLoading, loadDisqus]);
 
   return (
     <div ref={containerRef} className="mt-8 pt-6 border-t border-premium-gray-200 dark:border-gray-700">
