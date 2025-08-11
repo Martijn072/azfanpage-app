@@ -65,18 +65,18 @@ interface ConferenceLeagueFixturesProps {
 export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: ConferenceLeagueFixturesProps) => {
   const navigate = useNavigate();
   const { data: participation } = useEuropeanParticipation(teamId);
+  const seasonInfo = getCurrentActiveSeason();
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['european-fixtures', teamId, participation?.competition],
+    queryKey: ['european-fixtures', teamId, participation?.competition, seasonInfo.currentSeason],
     queryFn: async () => {
       if (!teamId || !participation?.competition) return [];
       
-      const seasonInfo = getCurrentActiveSeason();
       const seasons = [seasonInfo.currentSeason];
       
-      // If we're in early season, also check next season
-      if (seasonInfo.currentSeason === '2024') {
-        seasons.push('2025');
+      // If we're in early season (before August), also check next season
+      if (seasonInfo.currentSeason === '2025') {
+        seasons.push('2026');
       }
       
       console.log('🏆 Fetching European fixtures for seasons:', seasons);
@@ -225,22 +225,18 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                   </div>
                 </div>
 
-                {/* Mobile-first layout: centered logos with score */}
                 <div className="flex items-center justify-center gap-4 sm:gap-8">
-                  {/* Home team */}
                   <div className="flex flex-col items-center gap-2">
                     <img 
                       src={fixture.teams.home.logo} 
                       alt={fixture.teams.home.name}
                       className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                     />
-                    {/* Show team name only on larger screens */}
                     <span className="hidden sm:block font-semibold text-az-black dark:text-white text-center text-sm">
                       {fixture.teams.home.name === 'AZ Alkmaar' ? 'AZ' : fixture.teams.home.name}
                     </span>
                   </div>
 
-                  {/* Score or VS */}
                   <div className="flex flex-col items-center justify-center">
                     {fixture.goals.home !== null && fixture.goals.away !== null ? (
                       <div className="text-2xl sm:text-3xl font-bold text-az-red">
@@ -253,21 +249,18 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                     )}
                   </div>
 
-                  {/* Away team */}
                   <div className="flex flex-col items-center gap-2">
                     <img 
                       src={fixture.teams.away.logo} 
                       alt={fixture.teams.away.name}
                       className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                     />
-                    {/* Show team name only on larger screens */}
                     <span className="hidden sm:block font-semibold text-az-black dark:text-white text-center text-sm">
                       {fixture.teams.away.name === 'AZ Alkmaar' ? 'AZ' : fixture.teams.away.name}
                     </span>
                   </div>
                 </div>
 
-                {/* Competition badge at bottom */}
                 <div className="flex justify-center mt-3">
                   <Badge 
                     variant="outline"
@@ -308,22 +301,18 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                   </div>
                 </div>
 
-                {/* Mobile-first layout: centered logos with score */}
                 <div className="flex items-center justify-center gap-4 sm:gap-8">
-                  {/* Home team */}
                   <div className="flex flex-col items-center gap-2">
                     <img 
                       src={fixture.teams.home.logo} 
                       alt={fixture.teams.home.name}
                       className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                     />
-                    {/* Show team name only on larger screens */}
                     <span className="hidden sm:block font-semibold text-az-black dark:text-white text-center text-sm">
                       {fixture.teams.home.name === 'AZ Alkmaar' ? 'AZ' : fixture.teams.home.name}
                     </span>
                   </div>
 
-                  {/* Score or VS */}
                   <div className="flex flex-col items-center justify-center">
                     {fixture.goals.home !== null && fixture.goals.away !== null ? (
                       <div className="text-2xl sm:text-3xl font-bold text-az-red">
@@ -336,21 +325,18 @@ export const ConferenceLeagueFixtures = ({ teamId, isLoadingTeamId }: Conference
                     )}
                   </div>
 
-                  {/* Away team */}
                   <div className="flex flex-col items-center gap-2">
                     <img 
                       src={fixture.teams.away.logo} 
                       alt={fixture.teams.away.name}
                       className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                     />
-                    {/* Show team name only on larger screens */}
                     <span className="hidden sm:block font-semibold text-az-black dark:text-white text-center text-sm">
                       {fixture.teams.away.name === 'AZ Alkmaar' ? 'AZ' : fixture.teams.away.name}
                     </span>
                   </div>
                 </div>
 
-                {/* Competition badge at bottom */}
                 <div className="flex justify-center mt-3">
                   <Badge 
                     variant="outline"

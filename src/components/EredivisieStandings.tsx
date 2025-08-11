@@ -1,11 +1,12 @@
-
 import { useEredivisieStandings } from '@/hooks/useFootballApi';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorMessage } from "@/components/ErrorMessage";
+import { getCurrentActiveSeason } from '@/utils/seasonUtils';
 
 export const EredivisieStandings = () => {
+  const seasonInfo = getCurrentActiveSeason();
   const { data: standings, isLoading, error, refetch } = useEredivisieStandings();
 
   if (error) {
@@ -36,7 +37,7 @@ export const EredivisieStandings = () => {
   return (
     <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm transform transition-all duration-300 hover:shadow-lg animate-fade-in">
       <CardHeader>
-        <CardTitle className="text-az-black dark:text-white">Eredivisie Stand Seizoen 2024-2025</CardTitle>
+        <CardTitle className="text-az-black dark:text-white">Eredivisie Stand Seizoen {seasonInfo.displaySeason}</CardTitle>
       </CardHeader>
       <CardContent>
         {standings?.length === 0 ? (

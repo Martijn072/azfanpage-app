@@ -2,16 +2,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { callFootballApi } from '@/utils/footballApiClient';
 import { FootballApiResponse, Standing } from '@/types/footballApi';
+import { getCurrentActiveSeason } from '@/utils/seasonUtils';
 
 // Hook for Eredivisie standings
-export const useEredivisieStandings = () => {
+export const useEredivisieStandings = (season?: string) => {
+  const seasonInfo = getCurrentActiveSeason();
+  const currentSeason = season || seasonInfo.currentSeason;
+  
   return useQuery({
-    queryKey: ['eredivisie-standings'],
+    queryKey: ['eredivisie-standings', currentSeason],
     queryFn: async () => {
-      console.log('🏆 Fetching Eredivisie standings...');
+      console.log(`🏆 Fetching Eredivisie standings for season ${currentSeason}...`);
       const response: FootballApiResponse<{ league: { standings: Standing[][] } }> = await callFootballApi('/standings', {
         league: '88', // Eredivisie league ID
-        season: '2024'
+        season: currentSeason
       });
       
       console.log('📊 Standings API Response:', response);

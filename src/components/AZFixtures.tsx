@@ -10,20 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { callFootballApi } from '@/utils/footballApiClient';
 import { FootballApiResponse, Fixture } from '@/types/footballApi';
 import { FixtureCard } from './FixtureCard';
-
-const currentSeason = '2025';
-const seasons = [
-  { value: '2025', label: '2025-2026' },
-  { value: '2024', label: '2024-2025' },
-  { value: '2023', label: '2023-2024' },
-  { value: '2022', label: '2022-2023' },
-  { value: '2021', label: '2021-2022' },
-  { value: '2020', label: '2020-2021' },
-  { value: '2019', label: '2019-2020' },
-  { value: '2018', label: '2018-2019' },
-  { value: '2017', label: '2017-2018' },
-  { value: '2016', label: '2016-2017' },
-];
+import { getCurrentActiveSeason, getSeasonOptions } from '@/utils/seasonUtils';
 
 interface AZFixturesProps {
   teamId: number | null;
@@ -31,14 +18,16 @@ interface AZFixturesProps {
 }
 
 export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
-  const [selectedSeason, setSelectedSeason] = useState<string>(currentSeason);
+  const seasonInfo = getCurrentActiveSeason();
+  const seasons = getSeasonOptions();
+  const [selectedSeason, setSelectedSeason] = useState<string>(seasonInfo.currentSeason);
   const navigate = useNavigate();
 
   // Fetch upcoming fixtures for current season
   const { data: upcomingFixtures, isLoading: upcomingLoading, error: upcomingError } = useQuery({
-    queryKey: ['az-upcoming-fixtures', teamId],
+    queryKey: ['az-upcoming-fixtures', teamId, selectedSeason],
     queryFn: async () => {
-      if (!teamId || selectedSeason !== currentSeason) return [];
+      if (!teamId || selectedSeason !== seasonInfo.currentSeason) return [];
       
       console.log('🔮 Fetching upcoming AZ fixtures...');
       const params: Record<string, string> = {
@@ -52,7 +41,7 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
       console.log('📊 Upcoming Fixtures Response:', response);
       return response.response || [];
     },
-    enabled: !!teamId && selectedSeason === currentSeason,
+    enabled: !!teamId && selectedSeason === seasonInfo.currentSeason,
     staleTime: 1000 * 60 * 15,
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -60,9 +49,9 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
 
   // Fetch recent played fixtures for current season
   const { data: recentFixtures, isLoading: recentLoading, error: recentError } = useQuery({
-    queryKey: ['az-recent-fixtures', teamId],
+    queryKey: ['az-recent-fixtures', teamId, selectedSeason],
     queryFn: async () => {
-      if (!teamId || selectedSeason !== currentSeason) return [];
+      if (!teamId || selectedSeason !== seasonInfo.currentSeason) return [];
       
       console.log('📊 Fetching recent AZ fixtures...');
       const params: Record<string, string> = {
@@ -76,7 +65,7 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
       console.log('📊 Recent Fixtures Response:', response);
       return response.response || [];
     },
-    enabled: !!teamId && selectedSeason === currentSeason,
+    enabled: !!teamId && selectedSeason === seasonInfo.currentSeason,
     staleTime: 1000 * 60 * 15,
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -86,7 +75,7 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
   const { data: historicalFixtures, isLoading: historicalLoading, error: historicalError } = useQuery({
     queryKey: ['az-historical-fixtures', teamId, selectedSeason],
     queryFn: async () => {
-      if (!teamId || selectedSeason === currentSeason) return [];
+      if (!teamId || selectedSeason === seasonInfo.currentSeason) return [];
       
       console.log(`🏆 Fetching AZ fixtures for season ${selectedSeason}...`);
       const params: Record<string, string> = {
@@ -99,7 +88,7 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
       console.log('📊 Historical Fixtures Response:', response);
       return response.response || [];
     },
-    enabled: !!teamId && selectedSeason !== currentSeason,
+    enabled: !!teamId && selectedSeason !== seasonInfo.currentSeason,
     staleTime: 1000 * 60 * 15,
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -172,7 +161,7 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
     return venueName;
   };
 
-  const isCurrentSeason = selectedSeason === currentSeason;
+  const isCurrentSeason = selectedSeason === seasonInfo.currentSeason;
   const isLoading = isCurrentSeason ? (upcomingLoading || recentLoading || historicalLoading) : historicalLoading;
   const error = upcomingError || recentError || historicalError;
 
@@ -229,7 +218,6 @@ export const AZFixtures = ({ teamId, isLoadingTeamId }: AZFixturesProps) => {
       </Card>
     );
   }
-
 
   return (
     <Card className="bg-white dark:bg-gray-800 border border-premium-gray-200 dark:border-gray-700 shadow-sm">

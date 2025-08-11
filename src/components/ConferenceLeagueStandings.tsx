@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEuropeanParticipation } from "@/hooks/useEuropeanParticipation";
 import { useAZTeamId } from "@/hooks/useFootballApi";
+import { getCurrentActiveSeason } from '@/utils/seasonUtils';
 
 interface Standing {
   rank: number;
@@ -44,14 +45,15 @@ const callFootballApi = async (endpoint: string, params: Record<string, string> 
 export const ConferenceLeagueStandings = () => {
   const { data: teamId } = useAZTeamId();
   const { data: participation } = useEuropeanParticipation(teamId);
+  const seasonInfo = getCurrentActiveSeason();
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['conference-league-standings'],
+    queryKey: ['conference-league-standings', seasonInfo.currentSeason],
     queryFn: async () => {
       console.log('🏆 Fetching Conference League standings...');
       const response: FootballApiResponse<{ league: { standings: Standing[][] } }> = await callFootballApi('/standings', {
         league: '848', // Conference League ID
-        season: '2024'
+        season: seasonInfo.currentSeason
       });
       
       console.log('📊 Conference League Standings Response:', response);
