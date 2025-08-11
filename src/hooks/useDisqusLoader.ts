@@ -1,6 +1,5 @@
 
-import { useState, useEffect } from 'react';
-import { useDarkMode } from '@/contexts/DarkModeContext';
+import { useState } from 'react';
 import { getWordPressUrl, getPossibleIdentifiers, cleanupDisqus } from '@/utils/disqusUtils';
 
 interface UseDisqusLoaderProps {
@@ -14,10 +13,9 @@ export const useDisqusLoader = ({ slug, title, articleId }: UseDisqusLoaderProps
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentIdentifier, setCurrentIdentifier] = useState<string>('');
-  const { isDarkMode } = useDarkMode();
 
   const loadDisqusWithIdentifier = async (identifier: string, wpUrl: string) => {
-    console.log(`🔍 Testing identifier: "${identifier}" with URL: "${wpUrl}" in ${isDarkMode ? 'dark' : 'light'} mode`);
+    console.log(`🔍 Testing identifier: "${identifier}" with URL: "${wpUrl}"`);
 
     // Clean up any existing Disqus first
     cleanupDisqus();
@@ -30,60 +28,16 @@ export const useDisqusLoader = ({ slug, title, articleId }: UseDisqusLoaderProps
       return false;
     }
 
-    // Enhanced Disqus configuration with multiple dark mode approaches
+    // Simplified Disqus configuration - let Disqus handle its own theme
     window.disqus_config = function () {
       this.page.url = wpUrl;
       this.page.identifier = identifier;
       this.page.title = title;
       
-      // Multiple theme configuration approaches
-      this.colorScheme = isDarkMode ? 'dark' : 'light';
-      this.theme = isDarkMode ? 'dark' : 'light';
-      
-      // Try additional configuration options
-      this.callbacks = {
-        onReady: [function() {
-          console.log('💡 Disqus loaded, applying dark mode fixes...');
-          
-          // Apply dark mode class to container
-          const container = document.getElementById('disqus_thread');
-          if (container) {
-            if (isDarkMode) {
-              container.classList.add('disqus-dark-mode', 'disqus-inverted');
-            } else {
-              container.classList.remove('disqus-dark-mode', 'disqus-inverted');
-            }
-          }
-          
-          // Try to communicate with iframe (may fail due to CORS)
-          try {
-            const iframe = container?.querySelector('iframe');
-            if (iframe && isDarkMode) {
-              // Add a data attribute to help with CSS targeting
-              iframe.setAttribute('data-theme', 'dark');
-            }
-          } catch (e) {
-            console.log('Could not access iframe content (CORS), relying on CSS fallbacks');
-          }
-        }],
-        
-        onNewComment: [function() {
-          // Reapply dark mode when new comments are loaded
-          if (isDarkMode) {
-            const container = document.getElementById('disqus_thread');
-            if (container) {
-              container.classList.add('disqus-dark-mode', 'disqus-inverted');
-            }
-          }
-        }]
-      };
-      
-      console.log('🔧 Enhanced Disqus config set:', {
+      console.log('🔧 Disqus config set:', {
         url: this.page.url,
         identifier: this.page.identifier,
-        title: this.page.title,
-        colorScheme: this.colorScheme,
-        theme: this.theme
+        title: this.page.title
       });
     };
 
@@ -98,21 +52,12 @@ export const useDisqusLoader = ({ slug, title, articleId }: UseDisqusLoaderProps
         console.log(`⏰ Timeout for identifier: ${identifier}`);
         script.remove();
         resolve(false);
-      }, 15000); // Increased timeout
+      }, 15000);
 
       script.onload = () => {
-        console.log(`✅ Disqus script loaded for identifier: ${identifier} in ${isDarkMode ? 'dark' : 'light'} mode`);
+        console.log(`✅ Disqus script loaded for identifier: ${identifier}`);
         clearTimeout(timeout);
         setCurrentIdentifier(identifier);
-        
-        // Apply dark mode styling after script loads
-        setTimeout(() => {
-          const container = document.getElementById('disqus_thread');
-          if (container && isDarkMode) {
-            container.classList.add('disqus-dark-mode', 'disqus-inverted');
-          }
-        }, 2000); // Longer delay to ensure Disqus is fully rendered
-        
         resolve(true);
       };
 
@@ -188,19 +133,6 @@ export const useDisqusLoader = ({ slug, title, articleId }: UseDisqusLoaderProps
     cleanupDisqus();
   };
 
-  // Enhanced dark mode change handler with better timing
-  useEffect(() => {
-    if (isLoaded && currentIdentifier) {
-      console.log(`🌓 Dark mode changed to ${isDarkMode ? 'dark' : 'light'}, reloading Disqus...`);
-      const wordpressUrl = getWordPressUrl(slug);
-      
-      // Longer delay and force reload to ensure proper theme application
-      setTimeout(() => {
-        loadDisqusWithIdentifier(currentIdentifier, wordpressUrl);
-      }, 1000);
-    }
-  }, [isDarkMode, isLoaded, currentIdentifier, slug, title]);
-
   return {
     isLoaded,
     isLoading,
@@ -210,3 +142,4 @@ export const useDisqusLoader = ({ slug, title, articleId }: UseDisqusLoaderProps
     resetDisqus
   };
 };
+

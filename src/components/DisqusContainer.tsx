@@ -63,9 +63,9 @@ export const DisqusContainer = ({
         </div>
       )}
 
-      {/* Disqus container with enhanced dark mode support */}
+      {/* Disqus container with clean dark mode support */}
       {(isLoading || isLoaded) && (
-        <div className={`bg-white dark:bg-gray-800 rounded-lg border border-premium-gray-100 dark:border-gray-700 overflow-hidden ${isDarkMode ? 'disqus-dark-theme disqus-inverted' : 'disqus-light-theme'}`}>
+        <div className={`bg-white dark:bg-gray-800 rounded-lg border border-premium-gray-100 dark:border-gray-700 overflow-hidden ${isDarkMode ? 'disqus-invert' : ''}`}>
           {isLoading && (
             <div className="text-center py-8">
               <Loader2 className="w-8 h-8 animate-spin text-az-red mx-auto mb-4" />
@@ -76,7 +76,7 @@ export const DisqusContainer = ({
           )}
           <div 
             id="disqus_thread" 
-            className={`p-4 min-h-[200px] ${isDarkMode ? 'disqus-dark-mode disqus-inverted' : ''}`}
+            className="p-4 min-h-[200px]"
           ></div>
         </div>
       )}
@@ -92,3 +92,4 @@ export const DisqusContainer = ({
     </>
   );
 };
+
