@@ -31,3 +31,7 @@ export const useAZTeamId = () => {
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
+
+// Export team statistics and fixtures hooks
+export { useTeamStatistics, useTeamFixtures, useTeamNextFixtures } from './useTeamStatistics';
+export { useTeamStatistics as useTeamStats, useTeamFixtures as useTeamMatches, useTeamNextFixtures as useTeamUpcoming } from './useTeamFixtures';

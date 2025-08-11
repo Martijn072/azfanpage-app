@@ -1,13 +1,20 @@
+
 import { useEredivisieStandings } from '@/hooks/useFootballApi';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { getCurrentActiveSeason } from '@/utils/seasonUtils';
+import { useNavigate } from 'react-router-dom';
 
 export const EredivisieStandings = () => {
   const seasonInfo = getCurrentActiveSeason();
   const { data: standings, isLoading, error, refetch } = useEredivisieStandings();
+  const navigate = useNavigate();
+
+  const handleTeamClick = (teamId: number) => {
+    navigate(`/team/${teamId}`);
+  };
 
   if (error) {
     return (
@@ -70,7 +77,8 @@ export const EredivisieStandings = () => {
                   return (
                     <TableRow 
                       key={standing.team.id}
-                      className={`${isAZ ? 'bg-az-red/10 dark:bg-az-red/20 border-b border-az-red/20 dark:border-az-red/30 hover:bg-az-red/15 dark:hover:bg-az-red/25' : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600'} transition-all duration-200 animate-fade-in`}
+                      onClick={() => handleTeamClick(standing.team.id)}
+                      className={`${isAZ ? 'bg-az-red/10 dark:bg-az-red/20 border-b border-az-red/20 dark:border-az-red/30 hover:bg-az-red/15 dark:hover:bg-az-red/25' : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600'} transition-all duration-200 animate-fade-in cursor-pointer`}
                       style={{ animationDelay: `${index * 0.02}s` }}
                     >
                       <TableCell className="font-medium">

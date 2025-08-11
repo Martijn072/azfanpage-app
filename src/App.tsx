@@ -17,6 +17,7 @@ import Notifications from "./pages/Notifications";
 import NotificationSettings from "./pages/NotificationSettings";
 import WedstrijdDetail from "./pages/WedstrijdDetail";
 import SpelerProfiel from "./pages/SpelerProfiel";
+import TeamDetail from "./pages/TeamDetail";
 import Forum from "./pages/Forum";
 import Over from "./pages/Over";
 import NotFound from "./pages/NotFound";
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/nieuws" element={<News />} />
             <Route path="/artikel/:id" element={<ArticleDetail />} />
             <Route path="/eredivisie" element={<Eredivisie />} />
+            <Route path="/team/:teamId" element={<TeamDetail />} />
             <Route path="/programma" element={<AZProgramma />} />
             <Route path="/spelers" element={<SpelerStatistieken />} />
             <Route path="/conference-league" element={<ConferenceLeague />} />
