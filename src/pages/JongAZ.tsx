@@ -9,6 +9,7 @@ import { FixtureCard } from "@/components/FixtureCard";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Target, Shield, Trophy } from "lucide-react";
 import { getCurrentActiveSeason } from "@/utils/seasonUtils";
+import { useLeagueIdByName } from "@/hooks/useLeagueId";
 import { 
   useJongAZTeamId, 
   useJongAZFixtures, 
@@ -21,6 +22,7 @@ const JongAZ = () => {
   const [activeTab, setActiveTab] = useState("eredivisie");
   const seasonInfo = getCurrentActiveSeason();
 
+  const { data: leagueData, isLoading: leagueLoading, error: leagueError } = useLeagueIdByName('Netherlands', 'Eerste Divisie');
   const { data: teamId, isLoading: teamIdLoading, error: teamIdError, refetch: refetchTeamId } = useJongAZTeamId();
   const { data: recentFixtures, isLoading: recentLoading, error: recentError, refetch: refetchRecent } = useJongAZFixtures(teamId, 5);
   const { data: upcomingFixtures, isLoading: upcomingLoading, error: upcomingError, refetch: refetchUpcoming } = useJongAZNextFixtures(teamId, 3);
@@ -38,8 +40,8 @@ const JongAZ = () => {
   };
 
   const getCompetitionName = (leagueId: number, leagueName: string) => {
-    if (leagueId === 79) return 'Eerste Divisie';
-    return leagueName;
+    // Use the actual league name from the API
+    return leagueData?.name || leagueName || 'Eerste Divisie';
   };
 
   const getCompetitionBadgeVariant = (leagueId: number) => {
@@ -64,7 +66,7 @@ const JongAZ = () => {
     console.log('Fixture clicked:', fixtureId);
   };
 
-  const hasErrors = teamIdError || recentError || upcomingError || statsError || standingsError;
+  const hasErrors = leagueError || teamIdError || recentError || upcomingError || statsError || standingsError;
 
   if (hasErrors) {
     return (
@@ -104,7 +106,7 @@ const JongAZ = () => {
                   Jong AZ
                 </h1>
                 <p className="text-premium-gray-600 dark:text-gray-300">
-                  Eerste Divisie Seizoen {seasonInfo.displaySeason}
+                  {leagueData?.name || 'Eerste Divisie'} Seizoen {seasonInfo.displaySeason}
                 </p>
                 {jongAZPosition && (
                   <Badge variant="outline" className="mt-1">
@@ -256,7 +258,7 @@ const JongAZ = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-az-black dark:text-white">
               <Trophy className="w-5 h-5" />
-              Eerste Divisie Stand
+              {leagueData?.name || 'Eerste Divisie'} Stand
             </CardTitle>
           </CardHeader>
           <CardContent>
