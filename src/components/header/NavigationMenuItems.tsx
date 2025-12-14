@@ -79,7 +79,7 @@ export const NavigationMenuItems = () => {
             : 'text-az-black hover:text-az-red dark:text-white dark:hover:text-az-red'
         }`}
       >
-        Europa
+        Conference League
       </Link>
       <Link
         to="/forum"

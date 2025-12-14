@@ -34,7 +34,7 @@ export const HeaderMenu = ({ onSearchClick }: HeaderMenuProps) => {
     { path: "/programma", label: "Programma" },
     { path: "/jong-az", label: "Jong AZ" },
     { path: "/spelers", label: "Spelers" },
-    { path: "/conference-league", label: "Europa" },
+    { path: "/conference-league", label: "Conference League" },
     { path: "/forum", label: "Forum" },
   ];
 
