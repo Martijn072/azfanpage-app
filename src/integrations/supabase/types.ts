@@ -737,6 +737,28 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_article_comments: {
+        Args: { p_article_id: string }
+        Returns: {
+          article_id: string
+          author_avatar_url: string
+          author_name: string
+          content: string
+          content_html: string
+          created_at: string
+          depth: number
+          dislikes_count: number
+          id: string
+          is_edited: boolean
+          is_pinned: boolean
+          likes_count: number
+          parent_id: string
+          reply_count: number
+          updated_at: string
+          user_id: string
+          wordpress_user_id: number
+        }[]
+      }
       get_my_wordpress_profile: {
         Args: never
         Returns: {
