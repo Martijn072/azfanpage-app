@@ -118,6 +118,89 @@ const translatePosition = (position: string): string => {
   return positionMap[position] || position;
 };
 
+const translateNationality = (nationality: string): string => {
+  const nationalityMap: Record<string, string> = {
+    'Republic of Ireland': 'Ierland',
+    'Ireland': 'Ierland',
+    'Netherlands': 'Nederland',
+    'Germany': 'Duitsland',
+    'Belgium': 'België',
+    'France': 'Frankrijk',
+    'England': 'Engeland',
+    'Spain': 'Spanje',
+    'Portugal': 'Portugal',
+    'Italy': 'Italië',
+    'Denmark': 'Denemarken',
+    'Sweden': 'Zweden',
+    'Norway': 'Noorwegen',
+    'Poland': 'Polen',
+    'Croatia': 'Kroatië',
+    'Serbia': 'Servië',
+    'Greece': 'Griekenland',
+    'Turkey': 'Turkije',
+    'Morocco': 'Marokko',
+    'Nigeria': 'Nigeria',
+    'Ghana': 'Ghana',
+    'Cameroon': 'Kameroen',
+    'Argentina': 'Argentinië',
+    'Brazil': 'Brazilië',
+    'Japan': 'Japan',
+    'South Korea': 'Zuid-Korea',
+    'USA': 'Verenigde Staten',
+    'United States': 'Verenigde Staten',
+    'Scotland': 'Schotland',
+    'Wales': 'Wales',
+    'Austria': 'Oostenrijk',
+    'Switzerland': 'Zwitserland',
+    'Czech Republic': 'Tsjechië',
+    'Czechia': 'Tsjechië',
+    'Ukraine': 'Oekraïne',
+    'Russia': 'Rusland',
+    'Finland': 'Finland',
+    'Iceland': 'IJsland',
+    'Slovenia': 'Slovenië',
+    'Slovakia': 'Slowakije',
+    'Hungary': 'Hongarije',
+    'Romania': 'Roemenië',
+    'Bulgaria': 'Bulgarije',
+    'Albania': 'Albanië',
+    'Bosnia and Herzegovina': 'Bosnië en Herzegovina',
+    'Montenegro': 'Montenegro',
+    'North Macedonia': 'Noord-Macedonië',
+    'Kosovo': 'Kosovo',
+    'Luxembourg': 'Luxemburg',
+    'Curaçao': 'Curaçao',
+    'Suriname': 'Suriname',
+  };
+  return nationalityMap[nationality] || nationality;
+};
+
+const translateLeagueName = (name: string): string => {
+  const leagueMap: Record<string, string> = {
+    'Friendlies': 'Oefenwedstrijden',
+    'Friendlies Clubs': 'Oefenwedstrijden',
+    'Club Friendlies': 'Oefenwedstrijden',
+    'UEFA Champions League': 'Champions League',
+    'UEFA Europa League': 'Europa League',
+    'UEFA Europa Conference League': 'Conference League',
+    'Dutch Cup': 'KNVB Beker',
+    'Super Cup': 'Johan Cruijff Schaal',
+    'UEFA Super Cup': 'UEFA Super Cup',
+    'World Cup': 'WK',
+    'Euro Championship': 'EK',
+    'UEFA Nations League': 'Nations League',
+    'World Cup - Qualification Europe': 'WK-kwalificatie',
+    'Euro Championship - Qualification': 'EK-kwalificatie',
+  };
+  return leagueMap[name] || name;
+};
+
+// Check if a stat is a friendly match
+const isFriendlyMatch = (leagueName: string): boolean => {
+  const friendlyNames = ['Friendlies', 'Friendlies Clubs', 'Club Friendlies', 'Club Friendly'];
+  return friendlyNames.some(name => leagueName.toLowerCase().includes(name.toLowerCase()));
+};
+
 // Rating badge component with color coding
 const RatingBadge = ({ rating }: { rating: number | null }) => {
   if (!rating) return <span className="text-muted-foreground text-sm">-</span>;
@@ -158,7 +241,7 @@ const CompetitionCard = ({
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <h4 className="font-semibold text-foreground truncate">{stat.league.name}</h4>
+              <h4 className="font-semibold text-foreground truncate">{translateLeagueName(stat.league.name)}</h4>
               <RatingBadge rating={rating} />
             </div>
             <p className="text-sm text-muted-foreground mt-1">
@@ -298,7 +381,9 @@ const SpelerProfiel = () => {
     if (!currentSeason) return [];
     
     return currentSeason.statistics.filter(s => 
-      s.league.season === 2025 && s.games?.appearences > 0
+      s.league.season === 2025 && 
+      s.games?.appearences > 0 && 
+      !isFriendlyMatch(s.league.name)
     );
   };
 
@@ -310,7 +395,9 @@ const SpelerProfiel = () => {
     
     playerData.forEach(seasonData => {
       const seasonAZStats = seasonData.statistics.filter(
-        stat => stat.team.id === azTeamId && stat.games?.appearences > 0
+        stat => stat.team.id === azTeamId && 
+                stat.games?.appearences > 0 && 
+                !isFriendlyMatch(stat.league.name)
       );
       
       if (seasonAZStats.length > 0) {
@@ -338,7 +425,7 @@ const SpelerProfiel = () => {
     
     playerData.forEach(seasonData => {
       seasonData.statistics.forEach(stat => {
-        if (stat.games?.appearences > 0) {
+        if (stat.games?.appearences > 0 && !isFriendlyMatch(stat.league.name)) {
           const teamId = stat.team.id;
           
           if (!clubMap.has(teamId)) {
@@ -492,7 +579,7 @@ const SpelerProfiel = () => {
                       {translatePosition(position)}
                     </Badge>
                   )}
-                  <span className="text-sm text-muted-foreground">{playerInfo.nationality}</span>
+                  <span className="text-sm text-muted-foreground">{translateNationality(playerInfo.nationality)}</span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   {playerInfo.age} jaar
