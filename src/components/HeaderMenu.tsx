@@ -1,4 +1,3 @@
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,9 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { useWordPressAuth } from "@/contexts/WordPressAuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { AuthenticatedMenuItems } from "./header/AuthenticatedMenuItems";
 import { MobileMenuUtilities } from "./header/MobileMenuUtilities";
 import { Link, useLocation } from 'react-router-dom';
 
@@ -19,7 +16,6 @@ interface HeaderMenuProps {
 }
 
 export const HeaderMenu = ({ onSearchClick }: HeaderMenuProps) => {
-  const { isAuthenticated } = useWordPressAuth();
   const isMobile = useIsMobile();
   const location = useLocation();
 
@@ -78,9 +74,6 @@ export const HeaderMenu = ({ onSearchClick }: HeaderMenuProps) => {
             ))}
           </>
         )}
-        
-        {/* Authenticated user menu items */}
-        {isAuthenticated && <AuthenticatedMenuItems />}
       </DropdownMenuContent>
     </DropdownMenu>
   );

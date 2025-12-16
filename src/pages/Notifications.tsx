@@ -1,7 +1,6 @@
 import React from 'react';
-import { X, Trash2, CheckCheck, Bell, Goal, Newspaper, Trophy, AlertTriangle, Instagram, Twitter } from 'lucide-react';
+import { Trash2, CheckCheck, Bell, Goal, Newspaper, Trophy, Instagram, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications, useMarkAsRead, useClearAllNotifications, useDeleteNotification, type Notification } from '@/hooks/useNotifications';
 import { useNavigate } from 'react-router-dom';
@@ -9,8 +8,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { Header } from '@/components/Header';
 import { BottomNavigation } from '@/components/BottomNavigation';
-import { useWordPressAuth } from '@/contexts/WordPressAuthContext';
-import NotificationSettingsCTA from '@/components/NotificationSettingsCTA';
 
 const Notifications = () => {
   const navigate = useNavigate();
@@ -18,7 +15,6 @@ const Notifications = () => {
   const markAsRead = useMarkAsRead();
   const clearAll = useClearAllNotifications();
   const deleteNotification = useDeleteNotification();
-  const { isAuthenticated } = useWordPressAuth();
 
   const handleNotificationClick = async (notification: Notification) => {
     // Mark as read
@@ -90,13 +86,6 @@ const Notifications = () => {
             Notificaties
           </h1>
         </div>
-
-        {/* CTA for non-authenticated users */}
-        {!isAuthenticated && (
-          <div className="bg-card border-b border-border px-6 py-4">
-            <NotificationSettingsCTA />
-          </div>
-        )}
 
         {/* Status Bar */}
         {notifications.length > 0 && (

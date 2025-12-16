@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useWordPressAuth } from '@/contexts/WordPressAuthContext';
 
 export interface NotificationSettings {
   id: string;
@@ -20,38 +19,44 @@ export interface NotificationSettings {
   updated_at: string | null;
 }
 
+// Generate a unique device ID for anonymous notification settings
+const getDeviceId = (): string => {
+  let deviceId = localStorage.getItem('notification_device_id');
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem('notification_device_id', deviceId);
+  }
+  return deviceId;
+};
+
 export const useNotificationSettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user: wordpressUser, isAuthenticated } = useWordPressAuth();
+  const deviceId = getDeviceId();
 
   const { data: settings, isLoading, error } = useQuery({
-    queryKey: ['notification-settings', wordpressUser?.supabase_user_id],
+    queryKey: ['notification-settings', deviceId],
     queryFn: async () => {
-      if (!isAuthenticated || !wordpressUser?.supabase_user_id) {
-        throw new Error('User not authenticated');
-      }
-
-      console.log('🔔 Fetching notification settings for user:', wordpressUser.supabase_user_id);
+      console.log('🔔 Fetching notification settings for device:', deviceId);
       const { data, error } = await supabase
         .from('notification_settings')
         .select('*')
-        .eq('user_id', wordpressUser.supabase_user_id)
+        .eq('user_id', deviceId)
         .single();
       
       if (error) {
         if (error.code === 'PGRST116') {
           // No settings found, create default settings
-          console.log('📝 Creating default notification settings for WordPress user...');
+          console.log('📝 Creating default notification settings...');
           
           const { data: newSettings, error: createError } = await supabase
             .from('notification_settings')
             .insert({
-              user_id: wordpressUser.supabase_user_id,
-              email_new_comments: true,
-              email_comment_replies: true,
+              user_id: deviceId,
+              email_new_comments: false,
+              email_comment_replies: false,
               push_new_comments: false,
-              push_comment_replies: true,
+              push_comment_replies: false,
               push_new_articles: true,
               push_live_matches: true,
               push_social_media: false,
@@ -76,15 +81,10 @@ export const useNotificationSettings = () => {
       console.log('✅ Notification settings fetched:', data);
       return data as NotificationSettings;
     },
-    enabled: isAuthenticated && !!wordpressUser?.supabase_user_id,
   });
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (newSettings: Partial<NotificationSettings>) => {
-      if (!wordpressUser?.supabase_user_id) {
-        throw new Error('User not authenticated');
-      }
-
       console.log('💾 Updating notification settings:', newSettings);
       const { data, error } = await supabase
         .from('notification_settings')
@@ -92,7 +92,7 @@ export const useNotificationSettings = () => {
           ...newSettings,
           updated_at: new Date().toISOString(),
         })
-        .eq('user_id', wordpressUser.supabase_user_id)
+        .eq('user_id', deviceId)
         .select()
         .single();
 
@@ -105,7 +105,7 @@ export const useNotificationSettings = () => {
       return data as NotificationSettings;
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(['notification-settings'], data);
+      queryClient.setQueryData(['notification-settings', deviceId], data);
       queryClient.invalidateQueries({ queryKey: ['notification-settings'] });
     },
     onError: (error) => {

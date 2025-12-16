@@ -1,28 +1,18 @@
 import { useState } from "react";
-import { Bell, Search, Moon, Sun, User, LogOut } from "lucide-react";
+import { Bell, Search, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDarkMode } from "@/contexts/DarkModeContext";
 import { HeaderMenu } from "./HeaderMenu";
 import { NavigationMenuItems } from "./header/NavigationMenuItems";
 import { SearchOverlay } from "./SearchOverlay";
 import { useNotifications } from "@/hooks/useNotifications";
-import { useWordPressAuth } from "@/contexts/WordPressAuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export const Header = () => {
   const navigate = useNavigate();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { unreadCount } = useNotifications();
-  const { user, isAuthenticated, logout } = useWordPressAuth();
   const isMobile = useIsMobile();
 
   const handleLogoClick = () => {
@@ -35,15 +25,6 @@ export const Header = () => {
 
   const handleNotificationClick = () => {
     navigate("/notifications");
-  };
-
-  const handleLogin = () => {
-    navigate("/auth");
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
   };
 
   return (
@@ -69,44 +50,9 @@ export const Header = () => {
               </div>
             )}
 
-            {/* Mobile Actions - User avatar, notifications, dark mode, and hamburger menu */}
+            {/* Mobile Actions */}
             {isMobile ? (
               <div className="flex items-center gap-s">
-                {/* User Avatar on Mobile */}
-                {isAuthenticated && user && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-full p-0"
-                        aria-label="Gebruikersmenu openen"
-                      >
-                        {user.avatar_url ? (
-                          <img
-                            src={user.avatar_url}
-                            alt={`Profielfoto van ${user.display_name}`}
-                            className="h-8 w-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <User className="h-5 w-5" aria-hidden="true" />
-                        )}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <div className="flex flex-col space-y-1 p-2">
-                        <p className="text-sm font-medium">{user.display_name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                      </div>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Uitloggen
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-                
                 {/* Notifications */}
                 <button 
                   onClick={handleNotificationClick}
@@ -138,7 +84,7 @@ export const Header = () => {
                 <HeaderMenu onSearchClick={handleSearchClick} />
               </div>
             ) : (
-              /* Desktop Actions - All original actions */
+              /* Desktop Actions */
               <div className="flex items-center gap-s">
                 <button 
                   onClick={handleSearchClick}
@@ -170,49 +116,6 @@ export const Header = () => {
                     <Moon className="w-5 h-5 text-muted-foreground" />
                   )}
                 </button>
-                {/* User Profile / Login */}
-                {isAuthenticated && user ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 rounded-full"
-                        aria-label="Gebruikersmenu openen"
-                      >
-                        {user.avatar_url ? (
-                          <img
-                            src={user.avatar_url}
-                            alt={`Profielfoto van ${user.display_name}`}
-                            className="h-8 w-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <User className="h-5 w-5" aria-hidden="true" />
-                        )}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <div className="flex flex-col space-y-1 p-2">
-                        <p className="text-sm font-medium">{user.display_name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                      </div>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Uitloggen
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Button
-                    onClick={handleLogin}
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-az-red"
-                  >
-                    Inloggen
-                  </Button>
-                )}
                 <HeaderMenu />
               </div>
             )}
