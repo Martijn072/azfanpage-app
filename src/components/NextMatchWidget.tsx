@@ -92,8 +92,8 @@ export const NextMatchWidget = ({ className }: NextMatchWidgetProps) => {
   };
 
   const isAZHome = displayFixture.teams.home.id === teamId;
-  const azTeam = isAZHome ? displayFixture.teams.home : displayFixture.teams.away;
-  const opponentTeam = isAZHome ? displayFixture.teams.away : displayFixture.teams.home;
+  const homeTeam = displayFixture.teams.home;
+  const awayTeam = displayFixture.teams.away;
   
   const formatLatestEvent = (event: any) => {
     if (!event || !event.player?.name) return null;
@@ -140,29 +140,29 @@ export const NextMatchWidget = ({ className }: NextMatchWidgetProps) => {
 
         {/* Teams met Logo's */}
         <div className="flex items-center justify-center space-x-6 mb-2" id="next-match-details">
-          {/* AZ Logo */}
+          {/* Home Team Logo */}
           <div className="flex flex-col items-center">
             <div className="relative w-10 h-10 lg:w-12 lg:h-12">
               <img
-                src={azTeam.logo}
-                alt="AZ Alkmaar clublogo"
+                src={homeTeam.logo}
+                alt={`${homeTeam.name} clublogo`}
                 className="w-full h-full object-contain transition-transform duration-300"
                 onError={handleImageError}
               />
               <span 
-                className="absolute inset-0 bg-az-red text-white text-xs font-bold rounded-full flex items-center justify-center"
+                className="absolute inset-0 bg-muted text-foreground text-xs font-bold rounded-full flex items-center justify-center"
                 style={{ display: 'none' }}
                 aria-hidden="true"
               >
-                AZ
+                {homeTeam.name.substring(0, 3).toUpperCase()}
               </span>
             </div>
-            <span className="text-xs text-muted-foreground mt-1">
-              {isAZHome ? '(T)' : '(U)'}
+            <span className={`text-xs mt-1 ${homeTeam.id === teamId ? 'text-az-red font-semibold' : 'text-muted-foreground'}`}>
+              {homeTeam.name.length > 10 ? homeTeam.name.substring(0, 10) + '...' : homeTeam.name}
             </span>
           </div>
 
-          {/* VS - no animate-pulse */}
+          {/* VS */}
           <div className="flex flex-col items-center">
             <span 
               className="text-lg font-semibold text-muted-foreground"
@@ -172,12 +172,12 @@ export const NextMatchWidget = ({ className }: NextMatchWidgetProps) => {
             </span>
           </div>
 
-          {/* Opponent Logo */}
+          {/* Away Team Logo */}
           <div className="flex flex-col items-center">
             <div className="relative w-10 h-10 lg:w-12 lg:h-12">
               <img
-                src={opponentTeam.logo}
-                alt={`${opponentTeam.name} clublogo`}
+                src={awayTeam.logo}
+                alt={`${awayTeam.name} clublogo`}
                 className="w-full h-full object-contain transition-transform duration-300"
                 onError={handleImageError}
               />
@@ -186,9 +186,12 @@ export const NextMatchWidget = ({ className }: NextMatchWidgetProps) => {
                 style={{ display: 'none' }}
                 aria-hidden="true"
               >
-                {opponentTeam.name.substring(0, 3).toUpperCase()}
+                {awayTeam.name.substring(0, 3).toUpperCase()}
               </span>
             </div>
+            <span className={`text-xs mt-1 ${awayTeam.id === teamId ? 'text-az-red font-semibold' : 'text-muted-foreground'}`}>
+              {awayTeam.name.length > 10 ? awayTeam.name.substring(0, 10) + '...' : awayTeam.name}
+            </span>
           </div>
         </div>
 
