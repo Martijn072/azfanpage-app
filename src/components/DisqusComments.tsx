@@ -103,7 +103,7 @@ export const DisqusComments = ({ articleId, articleTitle, articleSlug }: DisqusC
 
   return (
     <div className="mt-8">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
           Reacties
@@ -118,10 +118,11 @@ export const DisqusComments = ({ articleId, articleTitle, articleSlug }: DisqusC
           variant="outline"
           size="sm"
           asChild
-          className="text-xs"
+          className="text-xs shrink-0 self-start sm:self-auto"
         >
           <a href={disqusUrl} target="_blank" rel="noopener noreferrer">
-            Reageer op de website
+            <span className="hidden sm:inline">Reageer op de website</span>
+            <span className="sm:hidden">Reageer</span>
             <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
           </a>
         </Button>

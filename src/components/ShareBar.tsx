@@ -80,7 +80,7 @@ export const ShareBar = ({ article, showBackButton = false, onBack, className = 
           
           <div className="flex items-center gap-2">
             {showBackButton && (
-              <Share2 className="w-4 h-4 text-premium-gray-500 dark:text-gray-400" />
+              <Share2 className="w-4 h-4 text-premium-gray-700 dark:text-gray-200" />
             )}
             <button
               onClick={handleWhatsAppShare}
