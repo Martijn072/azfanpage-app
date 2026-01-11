@@ -16,6 +16,7 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useOfflineDetection } from "@/hooks/useOfflineDetection";
 import { articleCache } from "@/services/articleCache";
+import FontSizeToggle from "@/components/FontSizeToggle";
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -501,9 +502,12 @@ const ArticleDetail = () => {
             {displayArticle.title}
           </h1>
 
-          {/* Meta info - Compact layout with author and date only */}
-          <div className="text-premium-gray-600 dark:text-gray-300 text-sm border-b border-premium-gray-200 dark:border-gray-700 pb-4">
-            <span>{displayArticle.author} • {displayArticle.publishedAt}</span>
+          {/* Meta info with font size toggle */}
+          <div className="flex items-center justify-between border-b border-premium-gray-200 dark:border-gray-700 pb-4">
+            <span className="text-premium-gray-600 dark:text-gray-300 text-sm">
+              {displayArticle.author} • {displayArticle.publishedAt}
+            </span>
+            <FontSizeToggle />
           </div>
         </header>
 
