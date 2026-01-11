@@ -294,6 +294,64 @@
   }
 }
 
+/* Font size toggle classes for article content */
+/* Mobile-first: larger base fonts, adjusted for desktop */
+
+/* Small font size */
+.font-size-small .article-content p,
+.font-size-small .article-content li {
+  font-size: 1.0625rem; /* 17px mobile */
+  line-height: 1.7;
+}
+
+.font-size-small .article-content h2 {
+  font-size: 1.375rem;
+}
+
+.font-size-small .article-content h3 {
+  font-size: 1.125rem;
+}
+
+/* Medium font size (default) */
+.font-size-medium .article-content p,
+.font-size-medium .article-content li {
+  font-size: 1.1875rem; /* 19px mobile */
+  line-height: 1.75;
+}
+
+/* Large font size */
+.font-size-large .article-content p,
+.font-size-large .article-content li {
+  font-size: 1.375rem; /* 22px mobile */
+  line-height: 1.8;
+}
+
+.font-size-large .article-content h2 {
+  font-size: 1.75rem;
+}
+
+.font-size-large .article-content h3 {
+  font-size: 1.375rem;
+}
+
+/* Desktop adjustments: slightly smaller fonts */
+@media (min-width: 768px) {
+  .font-size-small .article-content p,
+  .font-size-small .article-content li {
+    font-size: 1rem; /* 16px */
+  }
+
+  .font-size-medium .article-content p,
+  .font-size-medium .article-content li {
+    font-size: 1.125rem; /* 18px */
+  }
+
+  .font-size-large .article-content p,
+  .font-size-large .article-content li {
+    font-size: 1.25rem; /* 20px */
+  }
+}
+
 /* Disqus comment content overflow prevention */
 .prose a,
 .prose img,

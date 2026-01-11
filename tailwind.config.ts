@@ -101,9 +101,10 @@ export default {
 				'headline-lg': ['2rem', { lineHeight: '1.3', fontWeight: '700' }],
 				'headline-md': ['1.5rem', { lineHeight: '1.35', fontWeight: '600' }],
 				'headline-sm': ['1.25rem', { lineHeight: '1.4', fontWeight: '600' }],
-				'body-lg': ['1.125rem', { lineHeight: '1.75' }],
-				'body-md': ['1rem', { lineHeight: '1.65' }],
-				'body-sm': ['0.875rem', { lineHeight: '1.6' }],
+				// Mobile-first: larger base fonts for better readability
+				'body-lg': ['1.25rem', { lineHeight: '1.75' }],   // 20px mobile (was 18px)
+				'body-md': ['1.125rem', { lineHeight: '1.65' }],  // 18px mobile
+				'body-sm': ['1rem', { lineHeight: '1.6' }],       // 16px mobile
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

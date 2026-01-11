@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DarkModeProvider } from "@/contexts/DarkModeContext";
+import { FontSizeProvider } from "@/contexts/FontSizeContext";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { CanonicalTag } from "@/components/CanonicalTag";
 import { InstallPromptBanner } from "@/components/InstallPromptBanner";
@@ -30,8 +31,9 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <DarkModeProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
+      <FontSizeProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -78,9 +80,10 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </FontSizeProvider>
     </DarkModeProvider>
   );
 }
