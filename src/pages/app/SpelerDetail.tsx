@@ -24,7 +24,7 @@ const StatMini = ({ label, value }: { label: string; value: string | number | nu
 const StatSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div>
     <h4 className="text-app-small font-semibold text-muted-foreground uppercase tracking-wider mb-2">{title}</h4>
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-3 gap-3">
       {children}
     </div>
   </div>
