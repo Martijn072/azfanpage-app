@@ -85,10 +85,11 @@ export const StandingsTemplate = forwardRef<HTMLDivElement, StandingsTemplatePro
 
           {/* AZ Central Block */}
           <div
-            className="rounded-2xl px-10 py-10 mb-10 flex flex-col items-center"
+            className="rounded-2xl px-10 py-8 mb-8 flex flex-col items-center"
             style={{
-              backgroundColor: 'rgba(219,0,33,0.10)',
+              backgroundColor: 'rgba(15,17,23,0.85)',
               border: '2px solid rgba(219,0,33,0.35)',
+              backdropFilter: 'blur(8px)',
             }}
           >
             <div className="flex items-center gap-8 mb-6">
@@ -96,7 +97,6 @@ export const StandingsTemplate = forwardRef<HTMLDivElement, StandingsTemplatePro
                 {az.rank}<sup className="text-3xl align-super">e</sup>
               </span>
               <img src={az.team.logo} alt={az.team.name} className="h-24 w-24 object-contain" />
-              <span className="text-white text-4xl font-headline font-bold">{az.team.name}</span>
             </div>
 
             <div className="flex items-center gap-12 mb-8">
