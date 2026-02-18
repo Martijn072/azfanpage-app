@@ -12,7 +12,7 @@ const AZ_TEAM_ID = 201;
 // Override API positions where they differ from practice
 const POSITION_OVERRIDES: Record<string, string> = {
   "T. Parrott": "Attacker",
-  "S. Patati": "Attacker",
+  "Weslley Patati": "Attacker",
   "M. Daal": "Attacker",
 };
 
