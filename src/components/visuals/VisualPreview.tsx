@@ -9,6 +9,10 @@ import { StandingsTemplate } from './templates/StandingsTemplate';
 import { MatchdayTemplate } from './templates/MatchdayTemplate';
 import { PlayerHighlightTemplate } from './templates/PlayerHighlightTemplate';
 import { QuoteTemplate } from './templates/QuoteTemplate';
+import { BreakingTemplate } from './templates/BreakingTemplate';
+import { StatTemplate } from './templates/StatTemplate';
+import { GamedayTemplate } from './templates/GamedayTemplate';
+import { PollTemplate } from './templates/PollTemplate';
 import { useAZTeamId, useAZFixtures, useNextAZFixture, useEredivisieStandings } from '@/hooks/useFootballApi';
 import { format } from 'date-fns';
 
@@ -17,6 +21,11 @@ interface VisualPreviewProps {
   backgroundImage: string | null;
   playerName?: string;
   tagline?: string;
+  headline?: string;
+  subtitle?: string;
+  statValue?: string;
+  statLabel?: string;
+  question?: string;
 }
 
 const TEMPLATE_SIZES: Record<TemplateType, { w: number; h: number }> = {
@@ -26,9 +35,13 @@ const TEMPLATE_SIZES: Record<TemplateType, { w: number; h: number }> = {
   matchday: { w: 1080, h: 1080 },
   player: { w: 1080, h: 1080 },
   quote: { w: 1080, h: 1080 },
+  breaking: { w: 1080, h: 1080 },
+  stat: { w: 1080, h: 1080 },
+  gameday: { w: 1080, h: 1080 },
+  poll: { w: 1080, h: 1080 },
 };
 
-export const VisualPreview = ({ template, backgroundImage, playerName = '', tagline = '' }: VisualPreviewProps) => {
+export const VisualPreview = ({ template, backgroundImage, playerName = '', tagline = '', headline = '', subtitle = '', statValue = '', statLabel = '', question = '' }: VisualPreviewProps) => {
   const templateRef = useRef<HTMLDivElement>(null);
   const { downloadPng } = useVisualDownload();
 
@@ -54,6 +67,10 @@ export const VisualPreview = ({ template, backgroundImage, playerName = '', tagl
       matchday: 'speelronde',
       player: 'speler',
       quote: 'citaat',
+      breaking: 'breaking',
+      stat: 'statistiek',
+      gameday: 'matchday',
+      poll: 'poll',
     };
     downloadPng(templateRef, `az-${labels[template]}-${format(new Date(), 'yyyyMMdd')}.png`);
   };
@@ -83,6 +100,10 @@ export const VisualPreview = ({ template, backgroundImage, playerName = '', tagl
             {template === 'matchday' && <MatchdayTemplate ref={templateRef} lastFixture={lastFixture} nextFixture={nextFixture} backgroundImage={backgroundImage} />}
             {template === 'player' && <PlayerHighlightTemplate ref={templateRef} playerName={playerName} tagline={tagline} backgroundImage={backgroundImage} />}
             {template === 'quote' && <QuoteTemplate ref={templateRef} playerName={playerName} tagline={tagline} backgroundImage={backgroundImage} />}
+            {template === 'breaking' && <BreakingTemplate ref={templateRef} headline={headline} subtitle={subtitle} backgroundImage={backgroundImage} />}
+            {template === 'stat' && <StatTemplate ref={templateRef} statValue={statValue} statLabel={statLabel} backgroundImage={backgroundImage} />}
+            {template === 'gameday' && <GamedayTemplate ref={templateRef} fixture={nextFixture} backgroundImage={backgroundImage} />}
+            {template === 'poll' && <PollTemplate ref={templateRef} question={question} backgroundImage={backgroundImage} />}
           </div>
         )}
       </div>
