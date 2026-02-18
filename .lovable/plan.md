@@ -1,56 +1,41 @@
 
-# Visuals verrijken: locatie-emoji verwijderen + achtergrondafbeelding upload
 
-## Wat verandert er?
+# Stand-template: AZ-focus card
 
-### 1. Locatie-emoji (📍) verwijderen
-De emoji voor het stadion wordt verwijderd uit de **ResultTemplate** en **PreviewTemplate**. De venue-tekst blijft staan, maar zonder het icoontje.
+## Concept
 
-### 2. Achtergrondafbeelding upload per template
-Een nieuwe upload-knop onder de template-selector waarmee je een eigen foto kunt uploaden die als achtergrond in de template wordt getoond. Denk aan een sfeerbeeld van het stadion, supporters, of het veld.
+De huidige tabel met 10 teams wordt vervangen door een visueel sterke kaart die draait om AZ. Het idee:
 
-**Hoe het werkt voor de gebruiker:**
-- Onder de template-selector verschijnt een "Achtergrond uploaden" knop
-- Je kiest een foto van je apparaat
-- De foto wordt als achtergrond in de geselecteerde template getoond (met een donkere overlay zodat tekst leesbaar blijft)
-- De achtergrond wordt per template onthouden zolang je op de pagina bent
-- Bij het downloaden wordt de achtergrond mee gerenderd in de PNG
-- Er is een "Verwijder achtergrond" knop om terug te gaan naar de standaard donkere achtergrond
+- **Bovenaan**: "Eredivisie" + seizoen als header, met het AZ Fanpage logo
+- **Centraal blok**: AZ groot uitgelicht met:
+  - Positie (groot cijfer, bijv. "6e")
+  - Club logo + naam
+  - Punten (groot)
+  - Vorm: de laatste 5 wedstrijden als gekleurde bolletjes (groen = winst, grijs = gelijk, rood = verlies)
+  - Gespeeld / Doelsaldo
+- **Onderaan**: Een compacte lijst met 2 teams boven AZ en 2 teams onder AZ, zodat je direct de concurrentie ziet. Elk met rank, logo, naam en punten.
 
----
+## Visuele stijl
 
-## Technische details
+- Formaat blijft 1080x1350 (story-formaat)
+- Donkere achtergrond met optionele achtergrondafbeelding (bestaande upload-functie)
+- AZ-rij krijgt een rode accent-border en subtiele rode achtergrond
+- De omliggende teams zijn kleiner en gedempt weergegeven
+- Rode gradient-lijn bovenaan (consistent met andere templates)
 
-### Bestanden die worden aangepast
+## Technische aanpak
 
-| Bestand | Wijziging |
-|---------|-----------|
-| `ResultTemplate.tsx` | Emoji verwijderen, `backgroundImage` prop toevoegen |
-| `PreviewTemplate.tsx` | Emoji verwijderen, `backgroundImage` prop toevoegen |
-| `StandingsTemplate.tsx` | `backgroundImage` prop toevoegen |
-| `MatchdayTemplate.tsx` | `backgroundImage` prop toevoegen |
-| `VisualPreview.tsx` | Upload-state beheren, achtergrond doorgeven aan templates |
-| `Visuals.tsx` | State voor achtergronden per template bijhouden |
+### Bestand: `src/components/visuals/templates/StandingsTemplate.tsx`
 
-### Nieuw bestand
+Volledige herbouw van de template-inhoud:
 
-| Bestand | Doel |
-|---------|------|
-| `src/components/visuals/BackgroundUploader.tsx` | Upload-component met preview-thumbnail en verwijder-knop |
+1. **AZ detectie**: Zoek AZ in de standings-array op basis van teamnaam (bestaande logica)
+2. **Context-teams**: Pak 2 teams boven en 2 teams onder AZ's positie uit de volledige stand
+3. **Centraal AZ-blok**: Groot weergegeven met positie, logo, punten en vorm-indicator
+4. **Vorm-bolletjes**: De `form`-string uit de API (bijv. "WWDLW") omzetten naar gekleurde cirkels
+5. **Omliggende teams**: Compacte rijen met rank, klein logo, naam en punten
 
-### Aanpak achtergrond in templates
+### Geen andere bestanden nodig
 
-Elke template krijgt een optionele `backgroundImage?: string` prop (een data-URL of object-URL). Wanneer aanwezig:
-- De vaste `bg-[#0F1117]` achtergrond wordt vervangen door de afbeelding
-- Een semi-transparante donkere overlay (`bg-black/60`) wordt erover gelegd zodat tekst leesbaar blijft
-- De afbeelding wordt getoond als `object-cover` zodat het het hele canvas vult
+De props (`standings`, `backgroundImage`) en het formaat (1080x1350) blijven identiek. Alleen de visuele inhoud van de template verandert.
 
-### Upload flow
-
-- Gebruik een standaard `<input type="file" accept="image/*">` (geen Supabase storage nodig)
-- De afbeelding wordt als lokale object-URL (`URL.createObjectURL`) in state opgeslagen
-- Geen server-side opslag: alles blijft in de browser-sessie
-- Bij download rendert `html-to-image` de achtergrond mee omdat het een gewoon DOM-element is
-
-### Geschatte omvang
-2 prompts: 1 voor de emoji-verwijdering + upload-component + template-aanpassingen, en 1 voor eventuele polish.
