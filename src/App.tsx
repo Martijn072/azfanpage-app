@@ -9,7 +9,10 @@ import { AppLayout } from "@/components/layout/AppLayout";
 const Dashboard = lazy(() => import("./pages/app/Dashboard"));
 const Wedstrijden = lazy(() => import("./pages/app/Wedstrijden"));
 const WedstrijdDetail = lazy(() => import("./pages/app/WedstrijdDetail"));
-const Placeholder = lazy(() => import("./pages/app/Placeholder"));
+const Voorbeschouwing = lazy(() => import("./pages/app/Voorbeschouwing"));
+const Nabeschouwing = lazy(() => import("./pages/app/Nabeschouwing"));
+const Competitie = lazy(() => import("./pages/app/Competitie"));
+const Spelers = lazy(() => import("./pages/app/Spelers"));
 
 const queryClient = new QueryClient();
 
@@ -30,10 +33,10 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/wedstrijden" element={<Wedstrijden />} />
                   <Route path="/wedstrijden/:id" element={<WedstrijdDetail />} />
-                  <Route path="/voorbeschouwing" element={<Placeholder />} />
-                  <Route path="/nabeschouwing" element={<Placeholder />} />
-                  <Route path="/competitie" element={<Placeholder />} />
-                  <Route path="/spelers" element={<Placeholder />} />
+                  <Route path="/voorbeschouwing" element={<Voorbeschouwing />} />
+                  <Route path="/nabeschouwing" element={<Nabeschouwing />} />
+                  <Route path="/competitie" element={<Competitie />} />
+                  <Route path="/spelers" element={<Spelers />} />
                   <Route path="*" element={<Dashboard />} />
                 </Routes>
               </Suspense>
