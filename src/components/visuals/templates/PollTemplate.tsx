@@ -33,11 +33,11 @@ export const PollTemplate = forwardRef<HTMLDivElement, PollTemplateProps>(
           </p>
 
           <div className="mt-10 flex items-center gap-3">
-            <div className="w-12 h-[3px] bg-[#DB0021]" />
+            <div className="w-12 h-[3px] bg-white/80" />
             <span className="text-white/70 font-body font-semibold uppercase tracking-widest" style={{ fontSize: 24 }}>
               Wat denk jij?
             </span>
-            <div className="w-12 h-[3px] bg-[#DB0021]" />
+            <div className="w-12 h-[3px] bg-white/80" />
           </div>
         </div>
 
