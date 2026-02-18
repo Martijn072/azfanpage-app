@@ -15,6 +15,7 @@ const Nabeschouwing = lazy(() => import("./pages/app/Nabeschouwing"));
 const Competitie = lazy(() => import("./pages/app/Competitie"));
 const Spelers = lazy(() => import("./pages/app/Spelers"));
 const SpelerDetail = lazy(() => import("./pages/app/SpelerDetail"));
+const Visuals = lazy(() => import("./pages/app/Visuals"));
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ function App() {
                   <Route path="/competitie" element={<Competitie />} />
                   <Route path="/spelers" element={<Spelers />} />
                   <Route path="/spelers/:id" element={<SpelerDetail />} />
+                  <Route path="/visuals" element={<Visuals />} />
                   <Route path="*" element={<Dashboard />} />
                 </Routes>
               </Suspense>
