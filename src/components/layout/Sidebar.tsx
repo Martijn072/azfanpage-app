@@ -22,10 +22,10 @@ const navItems = [
   { title: "Nabeschouwing", path: "/nabeschouwing", icon: BarChart3 },
   { title: "Competitie", path: "/competitie", icon: Trophy },
   { title: "Spelers", path: "/spelers", icon: Users },
+  { title: "Visuals", path: "/visuals", icon: Palette },
 ];
 
 const futureItems = [
-  { title: "Visuals", path: "/visuals", icon: Palette, disabled: true },
   { title: "Editor", path: "/editor", icon: PenTool, disabled: true },
   { title: "Instellingen", path: "/instellingen", icon: Settings, disabled: true },
 ];
