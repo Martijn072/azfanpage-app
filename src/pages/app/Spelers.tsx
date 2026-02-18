@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSquad } from "@/hooks/useSquad";
 import { useTeamStatistics } from "@/hooks/useTeamStatistics";
 import { SquadPlayer } from "@/types/footballApi";
@@ -17,8 +18,13 @@ const POSITION_MAP: Record<string, { label: string; icon: typeof Shield; order: 
 
 const POSITION_FILTERS = ["Alle", "Goalkeeper", "Defender", "Midfielder", "Attacker"] as const;
 
-const PlayerCard = ({ player }: { player: SquadPlayer }) => (
-  <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4 hover:border-primary/30 transition-colors">
+const PlayerCard = ({ player }: { player: SquadPlayer }) => {
+  const navigate = useNavigate();
+  return (
+    <div
+      onClick={() => navigate(`/spelers/${player.id}`)}
+      className="bg-card border border-border rounded-xl p-4 flex items-center gap-4 hover:border-primary/30 transition-colors cursor-pointer"
+    >
     <img
       src={player.photo}
       alt={player.name}
@@ -49,8 +55,9 @@ const PlayerCard = ({ player }: { player: SquadPlayer }) => (
         <span className="text-app-small text-muted-foreground">{player.age} jaar</span>
       </div>
     </div>
-  </div>
-);
+    </div>
+  );
+};
 
 const Spelers = () => {
   const { data: squad, isLoading } = useSquad(AZ_TEAM_ID);
