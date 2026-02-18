@@ -20,9 +20,6 @@ export const ResultTemplate = forwardRef<HTMLDivElement, ResultTemplateProps>(
 
     const { teams, goals, league } = fixture;
     const matchDate = format(new Date(fixture.fixture.date), "d MMMM yyyy", { locale: nl });
-    const isAZHome = teams.home.name.toLowerCase().includes('az');
-    const azWon = isAZHome ? (goals.home ?? 0) > (goals.away ?? 0) : (goals.away ?? 0) > (goals.home ?? 0);
-    const isDraw = goals.home === goals.away;
 
     return (
       <div
@@ -47,14 +44,14 @@ export const ResultTemplate = forwardRef<HTMLDivElement, ResultTemplateProps>(
         />
 
         <div className="relative z-10 flex flex-col items-center w-full px-16">
-          <div className="flex items-center gap-3 mb-4">
-            <img src={league.logo} alt={league.name} className="h-8 w-8 object-contain" />
-            <span className="text-[#9CA3AF] text-lg font-body tracking-wide uppercase">
+          <div className="flex items-center gap-3 mb-3">
+            <img src={league.logo} alt={league.name} className="h-9 w-9 object-contain" />
+            <span className="text-white/80 text-xl font-body tracking-wide uppercase">
               {league.name} · {league.round}
             </span>
           </div>
 
-          <p className="text-[#6B7280] text-base font-body mb-16">{matchDate}</p>
+          <p className="text-white/60 text-lg font-body mb-14">{matchDate}</p>
 
           <div className="flex items-center justify-center gap-12 w-full">
             <div className="flex flex-col items-center gap-5 flex-1">
@@ -67,17 +64,8 @@ export const ResultTemplate = forwardRef<HTMLDivElement, ResultTemplateProps>(
             <div className="flex flex-col items-center">
               <div className="flex items-baseline gap-4">
                 <span className="text-white font-mono text-[120px] font-bold leading-none">{goals.home ?? '-'}</span>
-                <span className="text-[#4B5563] font-mono text-[80px] font-light leading-none">–</span>
+                <span className="text-white/50 font-mono text-[80px] font-light leading-none">–</span>
                 <span className="text-white font-mono text-[120px] font-bold leading-none">{goals.away ?? '-'}</span>
-              </div>
-              <div
-                className="mt-6 px-6 py-2 rounded-full text-sm font-body font-semibold uppercase tracking-widest"
-                style={{
-                  backgroundColor: isDraw ? '#F59E0B22' : azWon ? '#22C55E22' : '#EF444422',
-                  color: isDraw ? '#F59E0B' : azWon ? '#22C55E' : '#EF4444',
-                }}
-              >
-                {isDraw ? 'Gelijkspel' : azWon ? 'Overwinning' : 'Nederlaag'}
               </div>
             </div>
 
@@ -90,14 +78,14 @@ export const ResultTemplate = forwardRef<HTMLDivElement, ResultTemplateProps>(
           </div>
 
           {fixture.fixture.venue && (
-            <p className="text-[#6B7280] text-base font-body mt-16">
+            <p className="text-white/60 text-xl font-body mt-14">
               {fixture.fixture.venue.name}, {fixture.fixture.venue.city}
             </p>
           )}
         </div>
 
         <div className="absolute bottom-8 right-10 flex items-center gap-2 z-10">
-          <img src="/lovable-uploads/02689d46-9781-412f-9093-feef3e99cfe2.png" alt="AZ Fanpage" className="h-7 w-auto opacity-60" />
+          <img src="/lovable-uploads/02689d46-9781-412f-9093-feef3e99cfe2.png" alt="AZ Fanpage" className="h-10 w-auto opacity-70" />
         </div>
       </div>
     );
