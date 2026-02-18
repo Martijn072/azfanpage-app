@@ -11,6 +11,9 @@ import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Trophy, MapPin, TrendingUp, Swords, BarChart3, Clock, Calendar, Users, Home, Plane } from "lucide-react";
+import { FormComparisonChart } from "@/components/voorbeschouwing/FormComparisonChart";
+import { GoalsTrendChart } from "@/components/voorbeschouwing/GoalsTrendChart";
+import { H2HVisualBar } from "@/components/voorbeschouwing/H2HVisualBar";
 
 const AZ_TEAM_ID = 201;
 
@@ -397,6 +400,18 @@ const Voorbeschouwing = () => {
             <Swords className="h-4 w-4 text-muted-foreground" />
             <h3 className="text-app-body-strong text-foreground">Onderlinge resultaten (laatste {h2hSummary.total})</h3>
           </div>
+
+          {/* Visual H2H bar */}
+          <div className="mb-4">
+            <H2HVisualBar
+              azWins={h2hSummary.azWins}
+              draws={h2hSummary.draws}
+              oppWins={h2hSummary.oppWins}
+              total={h2hSummary.total}
+              opponentName={opponent.name}
+            />
+          </div>
+
           <div className="grid grid-cols-3 gap-4 text-center mb-4">
             <div>
               <div className="text-app-data-lg font-mono text-primary">{h2hSummary.azWins}</div>
@@ -437,6 +452,19 @@ const Voorbeschouwing = () => {
           </div>
         </div>
       )}
+
+      {/* Context charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {allFixtures && opponentRecent && opponentId && (
+          <FormComparisonChart
+            azFixtures={allFixtures}
+            opponentFixtures={opponentRecent}
+            opponentId={opponentId}
+            opponentName={opponent.name}
+          />
+        )}
+        {allFixtures && <GoalsTrendChart fixtures={allFixtures} />}
+      </div>
 
       {/* Key players — AZ squad quick view */}
       {squad && squad.players && (
