@@ -13,7 +13,7 @@ const AZ_TEAM_ID = 201;
 const POSITION_OVERRIDES: Record<string, string> = {
   "T. Parrott": "Attacker",
   "Weslley Patati": "Attacker",
-  "M. Daal": "Attacker",
+  "Ro-Zangelo Daal": "Attacker",
 };
 
 const applyPositionOverrides = (players: SquadPlayer[]): SquadPlayer[] =>
