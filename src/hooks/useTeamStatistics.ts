@@ -46,14 +46,17 @@ export const useTeamStatistics = (teamId: number) => {
     queryKey: ['team-statistics', teamId, seasonInfo.currentSeason],
     queryFn: async () => {
       console.log(`📊 Fetching team statistics for team ${teamId} in season ${seasonInfo.currentSeason}...`);
-      const response: FootballApiResponse<TeamStatistics> = await callFootballApi('/teams/statistics', {
+      const response = await callFootballApi('/teams/statistics', {
         league: '88', // Eredivisie league ID
         season: seasonInfo.currentSeason,
         team: teamId.toString()
       });
       
       console.log('📊 Team Statistics API Response:', response);
-      return response.response[0] || null;
+      // The API returns a single object for /teams/statistics, not an array
+      const data = response.response;
+      if (Array.isArray(data)) return data[0] || null;
+      return data || null;
     },
     staleTime: 1000 * 60 * 60, // Cache for 1 hour
     retry: 2,
