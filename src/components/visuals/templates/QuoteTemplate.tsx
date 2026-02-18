@@ -52,7 +52,7 @@ export const QuoteTemplate = forwardRef<HTMLDivElement, QuoteTemplateProps>(
 
           {/* Player name */}
           <div className="mt-8 flex items-center gap-3">
-            <div className="w-12 h-[3px] bg-[#DB0021]" />
+            <div className="w-12 h-[3px] bg-white/80" />
             <p className="text-white/80 font-body font-semibold" style={{ fontSize: 32 }}>
               {playerName || 'Spelernaam'}
             </p>
