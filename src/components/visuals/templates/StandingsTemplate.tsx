@@ -33,12 +33,12 @@ export const StandingsTemplate = forwardRef<HTMLDivElement, StandingsTemplatePro
         <div className="relative z-10 flex flex-col px-14 py-14 flex-1">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <span className="text-[#DB0021] text-lg font-body font-semibold uppercase tracking-[0.25em]">
+              <span className="text-[#DB0021] text-xl font-body font-semibold uppercase tracking-[0.25em]">
                 Eredivisie
               </span>
               <h2 className="text-white text-4xl font-headline font-bold mt-1">Stand</h2>
             </div>
-            <img src="/lovable-uploads/02689d46-9781-412f-9093-feef3e99cfe2.png" alt="AZ Fanpage" className="h-8 w-auto opacity-60" />
+            <img src="/lovable-uploads/02689d46-9781-412f-9093-feef3e99cfe2.png" alt="AZ Fanpage" className="h-10 w-auto opacity-70" />
           </div>
 
           <div className="flex items-center px-5 py-3 text-[#6B7280] text-sm font-body font-semibold uppercase tracking-wider">
