@@ -1,7 +1,7 @@
-import { Trophy, FileSearch, BarChart3, Calendar, User, Quote } from 'lucide-react';
+import { Trophy, FileSearch, BarChart3, Calendar, User, Quote, Zap, Hash, Flame, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type TemplateType = 'result' | 'preview' | 'standings' | 'matchday' | 'player' | 'quote';
+export type TemplateType = 'result' | 'preview' | 'standings' | 'matchday' | 'player' | 'quote' | 'breaking' | 'stat' | 'gameday' | 'poll';
 
 interface TemplateSelectorProps {
   selected: TemplateType;
@@ -15,6 +15,10 @@ const templates: { id: TemplateType; label: string; icon: typeof Trophy; format:
   { id: 'matchday', label: 'Speelronde', icon: Calendar, format: '1080×1080' },
   { id: 'player', label: 'Speler', icon: User, format: '1080×1080' },
   { id: 'quote', label: 'Citaat', icon: Quote, format: '1080×1080' },
+  { id: 'breaking', label: 'Breaking', icon: Zap, format: '1080×1080' },
+  { id: 'stat', label: 'Statistiek', icon: Hash, format: '1080×1080' },
+  { id: 'gameday', label: 'Matchday', icon: Flame, format: '1080×1080' },
+  { id: 'poll', label: 'Poll', icon: MessageCircle, format: '1080×1080' },
 ];
 
 export const TemplateSelector = ({ selected, onSelect }: TemplateSelectorProps) => {
