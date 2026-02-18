@@ -50,8 +50,8 @@ export const PlayerHighlightTemplate = forwardRef<HTMLDivElement, PlayerHighligh
           )}
         </div>
 
-        {/* AZ Fanpage logo */}
-        <div className="absolute bottom-8 right-10 z-10">
+        {/* AZ Fanpage logo top-right */}
+        <div className="absolute top-14 right-10 z-10">
           <img src="/images/az-fanpage-logo.png" alt="AZ Fanpage" className="h-20 w-auto opacity-80" />
         </div>
       </div>

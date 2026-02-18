@@ -8,6 +8,7 @@ import { PreviewTemplate } from './templates/PreviewTemplate';
 import { StandingsTemplate } from './templates/StandingsTemplate';
 import { MatchdayTemplate } from './templates/MatchdayTemplate';
 import { PlayerHighlightTemplate } from './templates/PlayerHighlightTemplate';
+import { QuoteTemplate } from './templates/QuoteTemplate';
 import { useAZTeamId, useAZFixtures, useNextAZFixture, useEredivisieStandings } from '@/hooks/useFootballApi';
 import { format } from 'date-fns';
 
@@ -24,6 +25,7 @@ const TEMPLATE_SIZES: Record<TemplateType, { w: number; h: number }> = {
   standings: { w: 1080, h: 1080 },
   matchday: { w: 1080, h: 1080 },
   player: { w: 1080, h: 1080 },
+  quote: { w: 1080, h: 1080 },
 };
 
 export const VisualPreview = ({ template, backgroundImage, playerName = '', tagline = '' }: VisualPreviewProps) => {
@@ -51,6 +53,7 @@ export const VisualPreview = ({ template, backgroundImage, playerName = '', tagl
       standings: 'stand',
       matchday: 'speelronde',
       player: 'speler',
+      quote: 'citaat',
     };
     downloadPng(templateRef, `az-${labels[template]}-${format(new Date(), 'yyyyMMdd')}.png`);
   };
@@ -79,6 +82,7 @@ export const VisualPreview = ({ template, backgroundImage, playerName = '', tagl
             {template === 'standings' && <StandingsTemplate ref={templateRef} standings={standings ?? null} backgroundImage={backgroundImage} />}
             {template === 'matchday' && <MatchdayTemplate ref={templateRef} lastFixture={lastFixture} nextFixture={nextFixture} backgroundImage={backgroundImage} />}
             {template === 'player' && <PlayerHighlightTemplate ref={templateRef} playerName={playerName} tagline={tagline} backgroundImage={backgroundImage} />}
+            {template === 'quote' && <QuoteTemplate ref={templateRef} playerName={playerName} tagline={tagline} backgroundImage={backgroundImage} />}
           </div>
         )}
       </div>

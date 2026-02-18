@@ -15,6 +15,7 @@ const Visuals = () => {
     standings: null,
     matchday: null,
     player: null,
+    quote: null,
   });
 
   const handleUpload = (url: string) => {
@@ -42,7 +43,7 @@ const Visuals = () => {
         onRemove={handleRemove}
       />
 
-      {selected === 'player' && (
+      {(selected === 'player' || selected === 'quote') && (
         <div className="flex gap-4">
           <div className="flex-1 space-y-1.5">
             <Label htmlFor="playerName">Spelernaam</Label>
@@ -54,10 +55,10 @@ const Visuals = () => {
             />
           </div>
           <div className="flex-1 space-y-1.5">
-            <Label htmlFor="tagline">Tagline</Label>
+            <Label htmlFor="tagline">{selected === 'quote' ? 'Citaat' : 'Tagline'}</Label>
             <Input
               id="tagline"
-              placeholder="bijv. Hat-trick hero"
+              placeholder={selected === 'quote' ? 'bijv. Dit was onze beste wedstrijd' : 'bijv. Hat-trick hero'}
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
             />
