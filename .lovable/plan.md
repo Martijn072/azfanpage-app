@@ -1,191 +1,105 @@
 
 
-# AZ Fanpage Data App — Fase 0: Strip en Fundament
+# Visuals Module — Social Media Image Generator
 
-Dit is een grote ombouwoperatie. De huidige publiekssite wordt getransformeerd naar een **redactie-dashboard** voor data-analyse, visual-generatie en artikelpublicatie. We beginnen met Fase 0: het fundament leggen.
+## Overzicht
 
----
+Een nieuwe module binnen de app waarmee je automatisch social media-afbeeldingen genereert op basis van live wedstrijddata. Je selecteert een template, de data wordt automatisch ingevuld, en je downloadt een kant-en-klare PNG.
 
-## Wat blijft behouden
+## Templates (Fase 1)
 
-De volledige API-laag en data-logica blijft intact:
+| Template | Formaat | Databron |
+|----------|---------|----------|
+| **Uitslag** | 1080x1080 (Instagram) | `useAZFixtures` — score, teams, logos, competitie |
+| **Voorbeschouwing** | 1080x1080 | `useNextAZFixture` — datum, tijd, tegenstander, venue |
+| **Stand** | 1080x1350 | `useEredivisieStandings` — top-10 met AZ highlight |
+| **Speelronde** | 1080x1080 | `useAZFixtures` — laatste resultaat + volgende wedstrijd |
 
-- `src/utils/footballApiClient.ts` -- de centrale API-caller
-- `src/utils/seasonUtils.ts` -- seizoensberekening
-- `src/types/footballApi.ts` -- alle type definities
-- Alle data hooks: `useFixtureHooks`, `useStandingHooks`, `useTeamHooks`, `useTeamStatistics`, `useFixtureEvents`, `useFixtureLineups`, `useTeamFixtures`, `useFootballApi`, `useLeagueId`, `useJongAZHooks`, `useEuropeanParticipation`
-- `src/integrations/supabase/client.ts` -- Supabase connectie
-- `supabase/functions/football-api/` -- de Edge Function proxy
-- Bestaande UI component library (`src/components/ui/`) -- wordt hergebruikt met nieuwe styling
+## Hoe het werkt
 
----
-
-## Wat wordt verwijderd
-
-Alle website-specifieke code:
-
-- Alle pagina's in `src/pages/` (Index, News, ArticleDetail, Standen, etc.)
-- Website-componenten: Header, BottomNavigation, NewsCard, HeroNewsCard, SearchOverlay, CategoryFilter, ForumWidget, DisqusComments, ShareBar, SocialMediaPromo, etc.
-- SEO/PWA-specifieke code: CanonicalTag, InstallPromptBanner, manifest, service worker
-- WordPress content-rendering en artikelcache
-- Notification systeem en Disqus integratie
-- FontSizeContext en FontSizeToggle (niet relevant voor een dashboard)
-- Website-specifieke hooks: useArticles, useSearchArticles, useForumRSS, useSocialMediaPosts, useDisqusComments, etc.
-
----
-
-## Stap-voor-stap implementatie
-
-### Stap 1 -- Design System tokens implementeren
-
-Nieuw dark-mode kleurenpalet in `src/index.css` en `tailwind.config.ts`:
-
-| Token | Kleur | Gebruik |
-|-------|-------|---------|
-| `app-bg` | `#0F1117` | Hoofdachtergrond |
-| `app-surface` | `#1A1D27` | Cards, panels, sidebar |
-| `app-surface-hover` | `#22252F` | Hover states |
-| `app-surface-elevated` | `#252830` | Modals, dropdowns |
-| `app-border` | `#2A2D37` | Subtiele borders |
-| `app-border-strong` | `#3A3D47` | Benadrukte borders |
-
-Semantische kleuren voor data:
-- `success` (#22C55E), `warning` (#F59E0B), `danger` (#EF4444), `info` (#3B82F6)
-- Chart-kleuren: `chart-az` (#DB0021), `chart-opponent` (#6B7280), accenten
-
-Typografie wordt compacter (dashboard-optimized):
-- Body text: 14px (was 18-19px op de site)
-- JetBrains Mono toegevoegd voor data/cijfers
-- Outfit + Plus Jakarta Sans blijven (al geladen)
-
-### Stap 2 -- App Shell: Sidebar + Layout
-
-Nieuwe layout-structuur ter vervanging van de huidige Header + BottomNavigation:
+1. Gebruiker opent `/visuals` en ziet de template-galerij
+2. Klikt op een template — de preview verschijnt met live data
+3. Past optioneel kleuren/tekst aan
+4. Klikt "Download PNG" — `html-to-image` rendert het DOM-element naar een afbeelding
 
 ```text
-+--------------------------------------------------+
-| Top Bar (48px) -- Logo, breadcrumb, user          |
-+----------+---------------------------------------+
-|          |                                        |
-| Sidebar  |  Main Content Area                     |
-| (240px)  |  max-width: 1200px                     |
-|          |  padding: 24px                          |
-| Collapse |                                        |
-| = 64px   |  +----------+ +----------+             |
-|          |  |  Card     | |  Card    |             |
-|          |  |  p: 16px  | |  p: 16px |             |
-|          |  +----------+ +----------+             |
-|          |                                        |
-+----------+---------------------------------------+
++------------------------------------------+
+|  Visuals                                  |
+|                                           |
+|  [Uitslag] [Preview] [Stand] [Speelronde] |
+|                                           |
+|  +------------------------------------+   |
+|  |                                    |   |
+|  |     LIVE PREVIEW (1:1 ratio)       |   |
+|  |     met echte data                 |   |
+|  |                                    |   |
+|  +------------------------------------+   |
+|                                           |
+|  [ Download PNG ]  [ Kopieer ]            |
++------------------------------------------+
 ```
 
-Nieuwe bestanden:
-- `src/components/layout/AppLayout.tsx` -- hoofdlayout met sidebar + content area
-- `src/components/layout/Sidebar.tsx` -- navigatie sidebar (240px/64px collapsed)
-- `src/components/layout/TopBar.tsx` -- breadcrumb, logo, gebruiker
+## Technische aanpak
 
-Sidebar navigatie-items:
-- Dashboard (home)
-- Wedstrijden (lijst + analyse)
-- Voorbeschouwing
-- Nabeschouwing
-- Competitie (stand, context)
-- Spelers (vergelijkingen)
-- Visuals (later)
-- Editor (later)
-- Instellingen (later)
+### Nieuwe dependency
+- `html-to-image` (npm) — converteert een DOM-node naar PNG via canvas/SVG. Lichtgewicht, actief onderhouden, werkt goed met React refs.
 
-### Stap 3 -- Routing herstructureren
+### Nieuwe bestanden
 
-`App.tsx` wordt volledig herschreven:
+| Bestand | Doel |
+|---------|------|
+| `src/pages/app/Visuals.tsx` | Hoofdpagina met template-selector en preview |
+| `src/components/visuals/TemplateSelector.tsx` | Grid met template-kaarten |
+| `src/components/visuals/VisualPreview.tsx` | Preview-container met download-functionaliteit |
+| `src/components/visuals/templates/ResultTemplate.tsx` | Uitslag-template (1080x1080) |
+| `src/components/visuals/templates/PreviewTemplate.tsx` | Voorbeschouwing-template |
+| `src/components/visuals/templates/StandingsTemplate.tsx` | Stand-template (1080x1350) |
+| `src/components/visuals/templates/MatchdayTemplate.tsx` | Speelronde-template |
+| `src/hooks/useVisualDownload.ts` | Hook die `html-to-image` wraptmet toPng + download |
 
-| Route | Pagina | Beschrijving |
-|-------|--------|-------------|
-| `/` | Dashboard | Eerstvolgende + laatste wedstrijd + stand |
-| `/wedstrijden` | WedstrijdLijst | Gespeelde en geplande wedstrijden |
-| `/wedstrijden/:id` | WedstrijdAnalyse | Statistieken, tijdlijn, opstelling |
-| `/voorbeschouwing` | Voorbeschouwing | Data voor aankomende wedstrijd |
-| `/nabeschouwing` | Nabeschouwing | Analyse van laatste wedstrijd |
-| `/competitie` | Competitie | Standen, context, trends |
-| `/spelers` | Spelers | Statistieken en vergelijkingen |
+### Bestaande bestanden die worden aangepast
 
-### Stap 4 -- Dashboard pagina (eerste werkende view)
+| Bestand | Wijziging |
+|---------|-----------|
+| `src/components/layout/Sidebar.tsx` | Visuals-item activeren (disabled verwijderen, route koppelen) |
+| `src/App.tsx` | Route `/visuals` toevoegen met lazy import |
 
-De dashboard-pagina hergebruikt bestaande hooks:
-- `useNextAZFixture(201)` voor eerstvolgende wedstrijd
-- `useAZFixtures(201, 1)` voor laatste wedstrijd
-- `useEredivisieStandings()` voor top-5 stand
+### Template rendering-strategie
 
-Nieuwe componenten:
-- `src/pages/app/Dashboard.tsx`
-- `src/components/dashboard/NextMatchCard.tsx` -- countdown + quick-link
-- `src/components/dashboard/LastMatchCard.tsx` -- score + quick-link nabeschouwing
-- `src/components/dashboard/StandingsWidget.tsx` -- compacte top-5 Eredivisie
+Elk template-component:
+- Rendert op een vaste pixel-afmeting (bijv. 1080x1080) binnen een `transform: scale()` container zodat het in de preview past
+- Gebruikt inline styles + Tailwind voor de layout
+- Laadt team-logos via `<img>` tags (cross-origin safe via API-Football CDN)
+- Wordt via een React ref aan `html-to-image.toPng()` gekoppeld
 
-### Stap 5 -- index.html en metadata opschonen
+### Download flow
 
-- Verwijder SEO meta tags (noindex wordt behouden)
-- Verwijder Open Graph en Twitter tags
-- Verwijder JSON-LD structured data
-- Verwijder Google Analytics (interne tool)
-- Verwijder PWA service worker registratie
-- Titel aanpassen: "AZ Fanpage Data App"
-- JetBrains Mono font toevoegen aan Google Fonts link
-- Theme-color aanpassen naar dark: `#0F1117`
+```text
+Gebruiker klikt "Download"
+  -> useVisualDownload hook
+  -> toPng(ref.current, { pixelRatio: 2, cacheBust: true })
+  -> Blob -> anchor download -> "az-uitslag-20260218.png"
+```
 
----
+### Data-integratie per template
 
-## Technische details
+- **ResultTemplate**: hergebruikt `useAZFixtures(201, 1)` — dezelfde hook als Nabeschouwing
+- **PreviewTemplate**: hergebruikt `useNextAZFixture(201)` — dezelfde hook als Voorbeschouwing
+- **StandingsTemplate**: hergebruikt `useEredivisieStandings()`
+- **MatchdayTemplate**: combineert `useAZFixtures(201, 1)` + `useNextAZFixture(201)`
 
-### Bestanden die worden aangemaakt (nieuw)
-- `src/components/layout/AppLayout.tsx`
-- `src/components/layout/Sidebar.tsx`
-- `src/components/layout/TopBar.tsx`
-- `src/pages/app/Dashboard.tsx`
-- `src/components/dashboard/NextMatchCard.tsx`
-- `src/components/dashboard/LastMatchCard.tsx`
-- `src/components/dashboard/StandingsWidget.tsx`
+### Design van de templates
 
-### Bestanden die worden aangepast
-- `tailwind.config.ts` -- nieuwe kleurtokens, compactere typografie, spacing tokens
-- `src/index.css` -- volledig nieuw dark-mode design system (website-CSS wordt gestript)
-- `src/App.tsx` -- nieuwe routing, AppLayout wrapper, verwijder website-providers
-- `index.html` -- metadata opschonen, JetBrains Mono toevoegen
+- Donkere achtergrond (#0F1117) met AZ-rood accent
+- Team-logos prominent
+- Grote score-typography (JetBrains Mono)
+- AZ Fanpage watermark/logo in de hoek
+- Competitielogo + speelronde als context
 
-### Bestanden die worden verwijderd
-- Alle website-pagina's (`src/pages/Index.tsx`, `News.tsx`, `ArticleDetail.tsx`, etc.)
-- Website-componenten (Header, BottomNavigation, NewsCard, HeroNewsCard, etc.)
-- Website-specifieke hooks (useArticles, useSearchArticles, useForumRSS, etc.)
-- Website-specifieke contexts (FontSizeContext, DarkModeContext wordt vereenvoudigd)
-- SEO-componenten (CanonicalTag)
-- PWA-componenten (InstallPromptBanner, OfflineIndicator)
+## Geschatte omvang
 
-### Bestanden die behouden blijven (ongewijzigd)
-- `src/utils/footballApiClient.ts`
-- `src/utils/seasonUtils.ts`
-- `src/types/footballApi.ts`
-- `src/integrations/supabase/client.ts`
-- `src/hooks/useFixtureHooks.ts`
-- `src/hooks/useStandingHooks.ts`
-- `src/hooks/useTeamHooks.ts`
-- `src/hooks/useTeamStatistics.ts`
-- `src/hooks/useFixtureEvents.ts`
-- `src/hooks/useFixtureLineups.ts`
-- `src/hooks/useTeamFixtures.ts`
-- `src/hooks/useLeagueId.ts`
-- `src/hooks/useJongAZHooks.ts`
-- `src/hooks/useEuropeanParticipation.ts`
-- `supabase/functions/football-api/`
-- `src/components/ui/*` (UI primitives worden hergebruikt)
-
----
-
-## Resultaat na Fase 0
-
-Een werkende app-shell met:
-- Donker thema als default (professional tool look)
-- Sidebar navigatie met alle module-links
-- Dashboard met eerstvolgende wedstrijd, laatste resultaat en top-5 stand
-- Alle bestaande API-Football data beschikbaar via behouden hooks
-- Klaar als fundament voor Fase 1 (wedstrijd-analyse, statistieken views)
+- **Stap 1**: Pagina + routing + download-hook + 1 template (Uitslag) — 1 prompt
+- **Stap 2**: Overige 3 templates — 1-2 prompts
+- **Stap 3**: Styling polish, responsive preview scaling — 1 prompt
+- **Totaal**: 3-4 prompts
 
