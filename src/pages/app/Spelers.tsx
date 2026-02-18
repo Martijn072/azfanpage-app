@@ -9,6 +9,16 @@ import { cn } from "@/lib/utils";
 
 const AZ_TEAM_ID = 201;
 
+// Override API positions where they differ from practice
+const POSITION_OVERRIDES: Record<string, string> = {
+  "T. Parrott": "Attacker",
+  "S. Patati": "Attacker",
+  "M. Daal": "Attacker",
+};
+
+const applyPositionOverrides = (players: SquadPlayer[]): SquadPlayer[] =>
+  players.map(p => POSITION_OVERRIDES[p.name] ? { ...p, position: POSITION_OVERRIDES[p.name] } : p);
+
 const POSITION_MAP: Record<string, { label: string; icon: typeof Shield; order: number }> = {
   Goalkeeper: { label: "Keepers", icon: Shield, order: 0 },
   Defender: { label: "Verdedigers", icon: Footprints, order: 1 },
@@ -66,7 +76,7 @@ const Spelers = () => {
 
   const filteredPlayers = useMemo(() => {
     if (!squad?.players) return [];
-    let players = [...squad.players];
+    let players = applyPositionOverrides([...squad.players]);
 
     if (filter !== "Alle") {
       players = players.filter((p) => p.position === filter);
