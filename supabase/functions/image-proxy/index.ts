@@ -1,5 +1,15 @@
 import { corsHeaders } from "../_shared/cors.ts";
 
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -15,7 +25,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Only allow proxying from trusted domains
     const allowed = ['media.api-sports.io', 'media.api-football.com'];
     const parsed = new URL(url);
     if (!allowed.includes(parsed.hostname)) {
@@ -34,7 +43,7 @@ Deno.serve(async (req) => {
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const base64 = uint8ArrayToBase64(new Uint8Array(arrayBuffer));
     const contentType = response.headers.get('content-type') || 'image/png';
     const dataUrl = `data:${contentType};base64,${base64}`;
 
