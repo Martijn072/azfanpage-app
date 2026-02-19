@@ -5,12 +5,22 @@ import { supabase } from '@/integrations/supabase/client';
 
 async function toDataUrlViaProxy(src: string): Promise<string | null> {
   try {
+    console.log('[visual-export] Proxying image:', src);
     const { data, error } = await supabase.functions.invoke('image-proxy', {
       body: { url: src },
     });
-    if (error || !data?.dataUrl) return null;
+    if (error) {
+      console.error('[visual-export] Proxy error:', error);
+      return null;
+    }
+    if (!data?.dataUrl) {
+      console.error('[visual-export] No dataUrl in response:', data);
+      return null;
+    }
+    console.log('[visual-export] Proxy success for:', src);
     return data.dataUrl;
-  } catch {
+  } catch (e) {
+    console.error('[visual-export] Proxy exception:', e);
     return null;
   }
 }
@@ -19,16 +29,35 @@ async function inlineExternalImages(container: HTMLDivElement) {
   const images = container.querySelectorAll('img');
   const originals: { img: HTMLImageElement; src: string }[] = [];
 
+  console.log('[visual-export] Found', images.length, 'images to process');
+
   await Promise.all(
     Array.from(images).map(async (img) => {
-      const src = img.src;
-      if (!src || src.startsWith('data:') || src.startsWith(window.location.origin)) return;
+      const src = img.getAttribute('src') || img.src;
+      console.log('[visual-export] Checking image:', src);
+      
+      // Skip empty, data URLs, and local images
+      if (!src || src.startsWith('data:')) return;
+      
+      // Check if it's a local/relative image
+      try {
+        const imgUrl = new URL(src, window.location.origin);
+        if (imgUrl.origin === window.location.origin) {
+          console.log('[visual-export] Skipping local image:', src);
+          return;
+        }
+      } catch {
+        // relative URL, skip
+        return;
+      }
 
       originals.push({ img, src });
 
       const dataUrl = await toDataUrlViaProxy(src);
       if (dataUrl) {
         img.src = dataUrl;
+      } else {
+        console.warn('[visual-export] Could not proxy image:', src);
       }
     })
   );
@@ -47,7 +76,9 @@ export const useVisualDownload = () => {
     let restore: (() => void) | undefined;
 
     try {
+      console.log('[visual-export] Starting export...');
       restore = await inlineExternalImages(ref.current);
+      console.log('[visual-export] Images inlined, generating PNG...');
 
       const dataUrl = await toPng(ref.current, {
         pixelRatio: 2,
@@ -67,12 +98,13 @@ export const useVisualDownload = () => {
         },
       });
 
+      console.log('[visual-export] PNG generated, downloading...');
       const link = document.createElement('a');
       link.download = filename || `az-visual-${format(new Date(), 'yyyyMMdd')}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
-      console.error('Failed to generate image:', err);
+      console.error('[visual-export] Failed to generate image:', err);
     } finally {
       restore?.();
     }
