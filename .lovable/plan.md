@@ -1,68 +1,53 @@
 
+# Responsive Mobile Layout
 
-# Vier nieuwe foto-templates voor Visuals
+## Huidige situatie
 
-## Overzicht
+De sidebar is altijd zichtbaar op alle schermformaten, inclusief mobiel. Op een telefoon neemt de sidebar ~240px in beslag, waardoor de content bijna onleesbaar wordt. Er is geen hamburger-menu, geen off-canvas navigatie, en de content-area wordt extreem smal.
 
-Vier nieuwe templates die allemaal hetzelfde principe volgen als Speler en Citaat: een eigen foto vertelt het verhaal, met tekst eroverheen.
+## Aanpak
 
-### 1. Breaking News
-- **Doel**: Transfers, blessures, breaking nieuws
-- **Invoervelden**: Headline + subtitle
-- **Layout**: Rood "BREAKING" accent-balkje, grote vette headline, kleinere subtitel eronder
-- **Logo**: Rechtsboven
+### 1. Sidebar omzetten naar mobiel hamburger-menu
 
-### 2. Statistiek
-- **Doel**: Mijlpalen uitlichten (bijv. "100 goals", "50 caps")
-- **Invoervelden**: Getal/waarde + beschrijving
-- **Layout**: Enorm groot getal centraal, beschrijving eronder
-- **Logo**: Rechtsboven
+**Sidebar.tsx** aanpassen:
+- Op desktop (md en groter): sidebar blijft zoals hij is (vast aan de linkerkant)
+- Op mobiel (kleiner dan md/768px): sidebar verbergen en vervangen door een **off-canvas drawer** die opent via een hamburger-knop
+- De sidebar gebruikt een overlay wanneer geopend op mobiel
+- Menu sluit automatisch bij het klikken op een navigatie-item
 
-### 3. Matchday (intern id: `gameday`)
-- **Doel**: Wedstrijddag-aankondiging met sfeer
-- **Invoervelden**: Geen (haalt automatisch de volgende wedstrijd op via bestaande API)
-- **Layout**: "MATCHDAY" tekst bovenaan, teamlogo's + aftrapstijd centraal, stadion/competitie info onderaan, alles over de geuploade sfeerfoto
-- **Logo**: Rechtsboven
+### 2. TopBar.tsx aanpassen voor mobiel
 
-### 4. Poll / Stelling
-- **Doel**: Engagement op social media
-- **Invoervelden**: Vraag/stelling
-- **Layout**: Grote vraagtekst centraal over de foto, "Wat denk jij?" of eigen tekst
-- **Logo**: Rechtsboven
+- Hamburger-icoon links toevoegen (alleen zichtbaar op mobiel)
+- Paginanaam en seizoen-selector compacter maken op mobiel
+- "Redactie" label verbergen op kleine schermen
 
----
+### 3. AppLayout.tsx aanpassen
 
-## Technische aanpak
+- De layout-wrapper moet de mobiele sidebar-state doorgeven
+- Op mobiel: geen vaste sidebar, alleen de hamburger-triggered drawer
 
-### TemplateSelector.tsx
-- `TemplateType` uitbreiden met `'breaking' | 'stat' | 'gameday' | 'poll'`
-- Vier nieuwe items toevoegen met passende iconen (Zap, Hash, Flame, MessageCircle)
+### 4. Content-pagina's: kleine verbeteringen
 
-### Nieuwe template-bestanden
-- `src/components/visuals/templates/BreakingTemplate.tsx` — Props: `headline`, `subtitle`, `backgroundImage`
-- `src/components/visuals/templates/StatTemplate.tsx` — Props: `statValue`, `statLabel`, `backgroundImage`
-- `src/components/visuals/templates/GamedayTemplate.tsx` — Props: `fixture` (van API), `backgroundImage`
-- `src/components/visuals/templates/PollTemplate.tsx` — Props: `question`, `backgroundImage`
+De meeste pagina's gebruiken al responsive classes (`grid-cols-1 lg:grid-cols-2`, `sm:flex-row`, etc.), dus die zijn al redelijk goed. Specifieke verbeteringen:
 
-Alle templates volgen hetzelfde patroon: 1080x1080, full-bleed foto, gradient overlay, rode lijn bovenaan, AZ Fanpage logo rechtsboven.
+- **Visuals.tsx**: Template-selector knoppen op mobiel kleiner maken (alleen icoon + korte label, format-tekst verbergen)
+- **Voorbeschouwing/Nabeschouwing**: Match-header op mobiel versimpelen (team-namen onder logo's i.p.v. ernaast)
+- **Competitie**: Tabel is al responsive met `hidden sm:table-cell` -- dat is goed
 
-### Visuals.tsx
-- State uitbreiden met `headline`, `subtitle`, `statValue`, `statLabel`, `question`
-- Conditionele invoervelden per template tonen:
-  - **breaking**: headline + subtitle
-  - **stat**: getal + beschrijving
-  - **gameday**: geen extra velden (API-data)
-  - **poll**: vraag/stelling
-- `backgrounds` record uitbreiden met de vier nieuwe keys
+### 5. Padding en spacing aanpassen
 
-### VisualPreview.tsx
-- Imports voor de vier nieuwe templates
-- `TEMPLATE_SIZES` uitbreiden (allemaal 1080x1080)
-- Download-labels toevoegen
-- Props doorsturen en conditioneel renderen
-- Gameday-template krijgt `nextFixture` mee (al beschikbaar via bestaande hook)
+- `AppLayout` main padding: `p-6` wordt `p-4 md:p-6`
+- Content max-width kan op mobiel volle breedte gebruiken
 
-### Geen nieuwe dependencies of API-calls
-- Gameday hergebruikt de bestaande `useNextAZFixture` hook
-- De andere drie zijn puur handmatige tekst + foto
+## Technisch overzicht
 
+### Bestanden die wijzigen:
+- `src/components/layout/Sidebar.tsx` -- hamburger-menu + off-canvas drawer op mobiel
+- `src/components/layout/TopBar.tsx` -- hamburger-knop, compactere mobiele weergave
+- `src/components/layout/AppLayout.tsx` -- sidebar-state management, padding-aanpassing
+- `src/components/visuals/TemplateSelector.tsx` -- format-label verbergen op mobiel
+- `src/pages/app/Voorbeschouwing.tsx` -- match-header compacter op mobiel
+- `src/pages/app/Nabeschouwing.tsx` -- match-header compacter op mobiel
+
+### Geen nieuwe dependencies nodig
+De off-canvas drawer wordt gebouwd met standaard Tailwind CSS (translate-x + overlay).
